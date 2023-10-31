@@ -6,7 +6,7 @@ import datetime
 class User(Base):
     __tablename__ = "Users"
 
-    UserID: Mapped[int] = mapped_column(primary_key=True)
+    UserID: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     Nickname: Mapped[str] = mapped_column(String(30))
     Email: Mapped[str] = mapped_column(String(40))
     PhoneNumber: Mapped[str] = mapped_column(String(50))

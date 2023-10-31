@@ -8,6 +8,6 @@ from typing import List
 class Usertype(Base):
     __tablename__ = "Usertypes"
 
-    UsertypeID: Mapped[int] = mapped_column(primary_key=True)
-    Usertype: Mapped[str] = mapped_column(String(30))
+    UsertypeID: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    Usertype: Mapped[str] = mapped_column(String(30), unique=True)
     User: Mapped[List["User"]] = relationship()
