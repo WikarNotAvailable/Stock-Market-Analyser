@@ -7,8 +7,9 @@ class User(Base):
     __tablename__ = "Users"
 
     UserID: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    Nickname: Mapped[str] = mapped_column(String(30))
-    Email: Mapped[str] = mapped_column(String(40))
-    PhoneNumber: Mapped[str] = mapped_column(String(50))
+    Nickname: Mapped[str] = mapped_column(String(30), unique=True)
+    Email: Mapped[str] = mapped_column(String(50), unique=True)
+    PhoneNumber: Mapped[str] = mapped_column(String(20), unique=True)
     BirthDate: Mapped[datetime.date]
+    Password: Mapped[str] = mapped_column(String(30))
     UsertypeID: Mapped[int] = mapped_column(ForeignKey("Usertypes.UsertypeID"))
