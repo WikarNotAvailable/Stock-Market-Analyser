@@ -11,5 +11,5 @@ class User(Base):
     Email: Mapped[str] = mapped_column(String(50), unique=True)
     PhoneNumber: Mapped[str] = mapped_column(String(20), unique=True)
     BirthDate: Mapped[datetime.date]
-    Password: Mapped[str] = mapped_column(String(30))
+    Password: Mapped[str] = mapped_column(String(200))
     UsertypeID: Mapped[int] = mapped_column(ForeignKey("Usertypes.UsertypeID"))

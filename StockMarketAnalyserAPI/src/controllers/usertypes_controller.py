@@ -46,7 +46,7 @@ def construct_usertypes_controller(engine):
                 data.append({'UsertypeID': usertype.UsertypeID, 'Usertype': usertype.Usertype})
 
             return jsonify({
-                'Usertypes': {'data': data}
+                'usertypes': {'data': data}
             }), HTTP_200_OK
 
     @usertypes_controller.get('/<int:id>')
@@ -57,7 +57,7 @@ def construct_usertypes_controller(engine):
             usertype = session.execute(stmt).scalar()
             if usertype is None:
                 return jsonify({
-                     'error': 'Item with passed id was not found in database'
+                     'error': 'Usertype with passed id was not found in database'
                 }), HTTP_404_NOT_FOUND
 
             return jsonify({
