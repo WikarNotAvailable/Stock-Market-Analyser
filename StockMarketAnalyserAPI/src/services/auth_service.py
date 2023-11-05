@@ -131,7 +131,7 @@ def construct_auth_service(engine):
                      'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype}
         }), HTTP_200_OK
 
-    @auth_service.get('/token/refresh')
+    @auth_service.get('/token-refresh')
     @jwt_required(refresh=True)
     def refresh_users_token():
         identity = get_jwt_identity()

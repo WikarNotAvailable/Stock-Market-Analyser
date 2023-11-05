@@ -45,9 +45,9 @@ def construct_usertypes_controller(engine):
             for usertype in usertypes:
                 data.append({'UsertypeID': usertype.UsertypeID, 'Usertype': usertype.Usertype})
 
-            return jsonify({
-                'usertypes': {'data': data}
-            }), HTTP_200_OK
+        return jsonify({
+            'usertypes': {'data': data}
+        }), HTTP_200_OK
 
     @usertypes_controller.get('/<int:id>')
     def get_usertype(id):
@@ -60,9 +60,9 @@ def construct_usertypes_controller(engine):
                      'error': 'Usertype with passed id was not found in database'
                 }), HTTP_404_NOT_FOUND
 
-            return jsonify({
-                'UsertypeID': usertype.UsertypeID, 'Usertype': usertype.Usertype
-            }), HTTP_200_OK
+        return jsonify({
+            'UsertypeID': usertype.UsertypeID, 'Usertype': usertype.Usertype
+        }), HTTP_200_OK
 
     @usertypes_controller.delete('/<int:id>')
     def delete_usertype(id):
@@ -74,6 +74,7 @@ def construct_usertypes_controller(engine):
 
         with Session(engine) as session:
             session.execute(stmt)
+            session.commit()
 
         return jsonify({
             'response': "deleted"
@@ -92,6 +93,7 @@ def construct_usertypes_controller(engine):
         with Session(engine) as session:
             try:
                 session.execute(stmt)
+                session.commit()
             except exc.IntegrityError as error:
                 session.rollback()
                 if "UniqueViolation" in str(error):
