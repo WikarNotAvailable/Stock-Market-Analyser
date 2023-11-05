@@ -6,7 +6,7 @@ from src.models.usertype import Usertype
 from sqlalchemy import exc, select, delete, update
 from sqlalchemy.orm import Session
 from flask.json import jsonify
-from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash
 import phonenumbers
 import validators
@@ -17,7 +17,12 @@ def construct_users_controller(engine):
     users_controller = Blueprint('users_controller', __name__, url_prefix='/api/v1/users')
 
     @users_controller.get('/')
+    @jwt_required()
     def get_all_users():
+        user_identity = get_jwt_identity()
+        if user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         stmt = select(User)
 
         with Session(engine) as session:
@@ -34,7 +39,12 @@ def construct_users_controller(engine):
             }), HTTP_200_OK
 
     @users_controller.get('/<int:id>')
+    @jwt_required()
     def get_user(id):
+        user_identity = get_jwt_identity()
+        if user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         stmt = select(User).where(User.UserID == id)
 
         with Session(engine) as session:
@@ -51,10 +61,20 @@ def construct_users_controller(engine):
         }), HTTP_200_OK
 
     @users_controller.delete('/<int:id>')
+    @jwt_required()
     def delete_user(id):
-        item = get_user(id)
-        if item[1] is HTTP_404_NOT_FOUND:
-            return item
+        user_identity = get_jwt_identity()
+        if user_identity.get('userid') != id and user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
+        stmt = select(User).where(User.UserID == id)
+
+        with Session(engine) as session:
+            user = session.execute(stmt).scalar()
+            if user is None:
+                return jsonify({
+                    'error': 'User with passed id was not found in database'
+                }), HTTP_404_NOT_FOUND
 
         stmt = delete(User).where(User.UserID == id)
 
@@ -67,7 +87,12 @@ def construct_users_controller(engine):
         }), HTTP_200_OK
 
     @users_controller.put('/<int:id>')
+    @jwt_required()
     def update_user(id):
+        user_identity = get_jwt_identity()
+        if user_identity.get('userid') != id and user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         stmt = select(User).where(User.UserID == id)
 
         with Session(engine) as session:
@@ -140,6 +165,10 @@ def construct_users_controller(engine):
                         return jsonify({
                             'error': 'Phone humber already exists in database'
                         }), HTTP_400_BAD_REQUEST
+                elif 'ForeignKeyViolation' in str(error):
+                    return jsonify({
+                        'error': 'Usertype does not exist in database'
+                    }), HTTP_400_BAD_REQUEST
                 else:
                     raise Exception(str(error))
 

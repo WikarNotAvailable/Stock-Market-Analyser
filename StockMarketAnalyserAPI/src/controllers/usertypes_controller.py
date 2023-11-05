@@ -1,16 +1,23 @@
 from flask import Blueprint, request
-from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND
+from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, \
+    HTTP_401_UNAUTHORIZED
 from src.models.usertype import Usertype
 from sqlalchemy import delete, exc, select, update
 from sqlalchemy.orm import Session
 from flask.json import jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 def construct_usertypes_controller(engine):
     usertypes_controller = Blueprint('usertypes_controller', __name__, url_prefix='/api/v1/usertypes')
 
     @usertypes_controller.post('/')
+    @jwt_required()
     def post_usertype():
+        user_identity = get_jwt_identity()
+        if user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         usertype_name = request.get_json().get('Usertype', '')
 
         usertype = Usertype(Usertype=usertype_name)
@@ -65,7 +72,12 @@ def construct_usertypes_controller(engine):
         }), HTTP_200_OK
 
     @usertypes_controller.delete('/<int:id>')
+    @jwt_required()
     def delete_usertype(id):
+        user_identity = get_jwt_identity()
+        if user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         item = get_usertype(id)
         if item[1] is HTTP_404_NOT_FOUND:
             return item
@@ -81,7 +93,12 @@ def construct_usertypes_controller(engine):
         }), HTTP_200_OK
 
     @usertypes_controller.put('/<int:id>')
+    @jwt_required()
     def update_usertype(id):
+        user_identity = get_jwt_identity()
+        if user_identity.get('usertype') != 'Admin':
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
         item = get_usertype(id)
         if item[1] is HTTP_404_NOT_FOUND:
             return item

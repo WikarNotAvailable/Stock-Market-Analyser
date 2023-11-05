@@ -98,7 +98,7 @@ def construct_auth_service(engine):
 
             if check_password_hash(user.Password, password):
                 usertype = session.get(Usertype, user.UsertypeID)
-                identity = {'userid': user.UserID, 'usertype':usertype.Usertype}
+                identity = {'userid': user.UserID, 'usertype': usertype.Usertype}
 
                 refresh = create_refresh_token(identity=identity)
                 access = create_access_token(identity=identity)
@@ -106,7 +106,7 @@ def construct_auth_service(engine):
                 return jsonify({'error': 'Wrong credentials'}), HTTP_401_UNAUTHORIZED
 
         return jsonify({
-            'user': {'refresh': refresh, 'access': access, 'Nickname': user.Nickname, 'Email': user.Email,
+            'user': {'refresh': refresh, 'access': access, 'UserID': user.UserID, 'Nickname': user.Nickname, 'Email': user.Email,
                      'PhoneNumber': user.PhoneNumber, 'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype}
         }), HTTP_200_OK
 
@@ -127,7 +127,7 @@ def construct_auth_service(engine):
             usertype = session.get(Usertype, user.UsertypeID)
 
         return jsonify({
-            'user': {'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
+            'user': {'UserID': user.UserID, 'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
                      'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype}
         }), HTTP_200_OK
 
