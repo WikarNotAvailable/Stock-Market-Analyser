@@ -17,7 +17,9 @@ def construct_auth_service(engine):
     auth_service = Blueprint('auth_service', __name__, url_prefix='/api/v1/auth')
 
     @auth_service.post('/register')
+    @jwt_required(optional=True)
     def register():
+        user_identity = get_jwt_identity()
         nickname = request.get_json().get('Nickname', '')
         email = request.get_json().get('Email', '')
         phone_number = request.get_json().get('PhoneNumber', '')

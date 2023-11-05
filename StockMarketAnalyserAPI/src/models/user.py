@@ -3,6 +3,7 @@ from sqlalchemy import String, ForeignKey
 from src.models.base import Base
 import datetime
 
+
 class User(Base):
     __tablename__ = "Users"
 

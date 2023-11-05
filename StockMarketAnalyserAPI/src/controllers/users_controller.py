@@ -31,7 +31,7 @@ def construct_users_controller(engine):
             data = []
             for user in users:
                 usertype = session.get(Usertype, user.UsertypeID)
-                data.append({'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
+                data.append({'UserID': user.UserID, 'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
                              'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype})
 
             return jsonify({
@@ -56,7 +56,7 @@ def construct_users_controller(engine):
             usertype = session.get(Usertype, user.UsertypeID)
 
         return jsonify({
-             'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
+             'UserID': user.UserID, 'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
              'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype
         }), HTTP_200_OK
 
@@ -175,7 +175,7 @@ def construct_users_controller(engine):
         usertype = session.get(Usertype, usertype_id)
 
         return jsonify({
-            'Nickname': nickname, 'Email': email, 'PhoneNumber': phone_number, 'BirthDate': birth_date,
+            'UserID': user.UserID, 'Nickname': nickname, 'Email': email, 'PhoneNumber': phone_number, 'BirthDate': birth_date,
             'Usertype': usertype.Usertype
         }), HTTP_200_OK
 
