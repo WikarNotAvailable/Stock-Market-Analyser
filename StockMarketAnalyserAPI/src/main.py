@@ -9,6 +9,7 @@ from src.models.company_on_stock_market import association_table
 from flask_cors import CORS
 from src.controllers.usertypes_controller import construct_usertypes_controller
 from src.controllers.users_controller import construct_users_controller
+from src.controllers.stock_market_controller import construct_stock_market_controller
 from src.services.auth_service import construct_auth_service
 import os
 
@@ -24,3 +25,4 @@ Base.metadata.create_all(get_engine_from_settings(), checkfirst=True)
 app.register_blueprint(construct_usertypes_controller(get_engine_from_settings()))
 app.register_blueprint(construct_users_controller(get_engine_from_settings()))
 app.register_blueprint(construct_auth_service(get_engine_from_settings()))
+app.register_blueprint(construct_stock_market_controller(get_engine_from_settings()))

@@ -18,7 +18,7 @@ class Company(Base):
     Name: Mapped[str] = mapped_column(String(80))
     Country: Mapped[str] = mapped_column(String(50))
     FoundationDate: Mapped[datetime.date]
-    Description: Mapped[str] = mapped_column(String(500))
+    Description: Mapped[str] = mapped_column(String(2000))
     StockMarkets: Mapped[List["StockMarket"]] = relationship(secondary=association_table, back_populates="Companies",
                                                              cascade="all, delete")
     HistoricalStockData: Mapped[List["HistoricalStockData"]] = relationship(passive_deletes=True)

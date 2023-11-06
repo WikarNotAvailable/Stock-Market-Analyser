@@ -17,7 +17,7 @@ class StockMarket(Base):
     Abbreviation: Mapped[str] = mapped_column(String(20))
     Country: Mapped[str] = mapped_column(String(50))
     FoundationDate: Mapped[datetime.date]
-    Description: Mapped[str] = mapped_column(String(500))
+    Description: Mapped[str] = mapped_column(String(2000))
     Localization: Mapped[str] = mapped_column(String(150))
     NumberOfCompanies: Mapped[int] = mapped_column(Integer)
     Companies: Mapped[List["Company"]] = relationship(secondary=association_table, back_populates="StockMarkets",
