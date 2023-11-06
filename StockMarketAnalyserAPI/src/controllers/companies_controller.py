@@ -1,0 +1,178 @@
+from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, \
+    HTTP_401_UNAUTHORIZED
+from src.models.company import Company
+from sqlalchemy import select, delete, update, exc
+from sqlalchemy.orm import Session
+from flask.json import jsonify
+import datetime
+
+from src.models.stock_market import StockMarket
+
+
+def construct_companies_controller(engine):
+    companies_controller = Blueprint('companies_controller', __name__, url_prefix='/api/v1/companies')
+
+    @companies_controller.post('/')
+    def post_company():
+        ticker_symbol = request.get_json().get('TickerSymbol', '')
+        name = request.get_json().get('Name', '')
+        country = request.get_json().get('Country', '')
+        foundation_date = request.get_json().get('FoundationDate', '')
+        description = request.get_json().get('Description', '')
+        stock_markets_ids = request.get_json().get('StockMarkets', '')
+
+        try:
+            datetime.date.fromisoformat(foundation_date)
+        except ValueError:
+            return jsonify({
+                'error': 'Invalid date'
+            }), HTTP_400_BAD_REQUEST
+
+        company = Company(TickerSymbol=ticker_symbol, Name=name, Country=country,
+                          FoundationDate=foundation_date, Description=description)
+        stock_markets_tuples = []
+
+        with Session(engine) as session:
+            with session.begin():
+                try:
+                    for stock_market_id in stock_markets_ids:
+                        stock_market = session.execute(select(StockMarket)
+                                                       .where(StockMarket.StockMarketID == stock_market_id)).scalar()
+                        if stock_market is None:
+                            return jsonify({
+                                'error': 'Company with passed id was not found in database'
+                            }), HTTP_404_NOT_FOUND
+                        stock_market.Companies.append(company)
+                        stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
+
+                    session.add(company)
+                    session.commit()
+                except exc.IntegrityError as error:
+                    session.rollback()
+                    if "UniqueViolation" in str(error):
+                        if 'Key ("TickerSymbol")' in str(error):
+                            return jsonify({
+                                'error': 'Ticker symbol already exists in database'
+                            }), HTTP_400_BAD_REQUEST
+                    else:
+                        raise Exception(str(error))
+            session.refresh(company)
+
+        return jsonify({
+            'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+            'FoundationDate': company.FoundationDate, 'Description': company.Description,
+            'StockMarkets': stock_markets_tuples
+        }), HTTP_201_CREATED
+
+    @companies_controller.get('/')
+    def get_all_companies():
+        stmt = select(Company)
+
+        with Session(engine) as session:
+            companies = session.execute(stmt).scalars().all()
+
+            data = []
+            for company in companies:
+                stock_markets_tuples = []
+                for stock_market in company.StockMarkets:
+                    stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
+
+                data.append(
+                    {'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+                     'FoundationDate': company.FoundationDate, 'Description': company.Description,
+                     'StockMarkets': stock_markets_tuples})
+
+            return jsonify({
+                'companies': {'data': data}
+            }), HTTP_200_OK
+
+    @companies_controller.get('/<int:id>')
+    def get_company(id):
+        stmt = select(Company).where(Company.CompanyID == id)
+
+        with Session(engine) as session:
+            company = session.execute(stmt).scalar()
+            if company is None:
+                return jsonify({
+                    'error': 'Company with passed id was not found in database'
+                }), HTTP_404_NOT_FOUND
+
+            stock_markets_tuples = []
+            for stock_market in company.StockMarkets:
+                stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
+
+        return jsonify({
+            'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+            'FoundationDate': company.FoundationDate, 'Description': company.Description,
+            'StockMarkets': stock_markets_tuples
+        }), HTTP_200_OK
+
+    @companies_controller.delete('/<int:id>')
+    def delete_company(id):
+        item = get_company(id)
+        if item[1] is HTTP_404_NOT_FOUND:
+            return item
+
+        stmt = delete(Company).where(Company.CompanyID == id)
+
+        with Session(engine) as session:
+            session.execute(stmt)
+            session.commit()
+
+        return jsonify({
+            'response': "deleted"
+        }), HTTP_200_OK
+
+    @companies_controller.put('/<int:id>')
+    def update_company(id):
+        stmt = select(Company).where(Company.CompanyID == id)
+
+        with Session(engine) as session:
+            company = session.execute(stmt).scalar()
+            if company is None:
+                return jsonify({
+                    'error': 'Company with passed id was not found in database'
+                }), HTTP_404_NOT_FOUND
+
+        ticker_symbol = request.get_json().get('TickerSymbol', '')
+        name = request.get_json().get('Name', '')
+        country = request.get_json().get('Country', '')
+        foundation_date = request.get_json().get('FoundationDate', '')
+        description = request.get_json().get('Description', '')
+        stock_markets_ids = request.get_json().get('StockMarkets', '')
+
+        ticker_symbol = company.TickerSymbol if not ticker_symbol else ticker_symbol
+        name = company.Name if not name else name
+        country = company.Country if not country else country
+        description = company.Description if not description else description
+
+        if not foundation_date:
+            foundation_date = company.FoundationDate
+        else:
+            try:
+                datetime.date.fromisoformat(foundation_date)
+            except ValueError:
+                return jsonify({
+                    'error': 'Invalid date'
+                }), HTTP_400_BAD_REQUEST
+
+        stmt = update(StockMarket).where(StockMarket.StockMarketID == id).values(Name=name, Abbreviation=abbreviation,
+                                                                                 Country=country,
+                                                                                 FoundationDate=foundation_date,
+                                                                                 Description=description,
+                                                                                 Localization=localization,
+                                                                                 NumberOfCompanies=number_of_companies)
+
+        with Session(engine) as session:
+            session.execute(stmt)
+            session.commit()
+
+        return jsonify({
+            'StockMarketID': stock_market.StockMarketID, 'Name': name, 'Abbreviation': abbreviation, 'Country': country,
+            'FoundationDate': foundation_date, 'Description': description, 'Localization': localization,
+            'NumberOfCompanies': number_of_companies
+        }), HTTP_200_OK
+
+    return companies_controller

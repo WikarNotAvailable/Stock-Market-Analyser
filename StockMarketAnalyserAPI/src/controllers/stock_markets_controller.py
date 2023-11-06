@@ -9,10 +9,10 @@ from flask.json import jsonify
 import datetime
 
 
-def construct_stock_market_controller(engine):
-    stock_market_controller = Blueprint('stock_market_controller', __name__, url_prefix='/api/v1/stock-markets')
+def construct_stock_markets_controller(engine):
+    stock_markets_controller = Blueprint('stock_markets_controller', __name__, url_prefix='/api/v1/stock-markets')
 
-    @stock_market_controller.post('/')
+    @stock_markets_controller.post('/')
     @jwt_required()
     def post_stock_market():
         user_identity = get_jwt_identity()
@@ -51,7 +51,7 @@ def construct_stock_market_controller(engine):
             'Localization': stock_market.Localization, 'NumberOfCompanies': stock_market.NumberOfCompanies
         }), HTTP_201_CREATED
 
-    @stock_market_controller.get('/')
+    @stock_markets_controller.get('/')
     def get_all_stock_markets():
         stmt = select(StockMarket)
 
@@ -70,7 +70,7 @@ def construct_stock_market_controller(engine):
                 'stock_markets': {'data': data}
             }), HTTP_200_OK
 
-    @stock_market_controller.get('/<int:id>')
+    @stock_markets_controller.get('/<int:id>')
     def get_stock_market(id):
         stmt = select(StockMarket).where(StockMarket.StockMarketID == id)
 
@@ -88,7 +88,7 @@ def construct_stock_market_controller(engine):
             'Localization': stock_market.Localization, 'NumberOfCompanies': stock_market.NumberOfCompanies
         }), HTTP_200_OK
 
-    @stock_market_controller.delete('/<int:id>')
+    @stock_markets_controller.delete('/<int:id>')
     @jwt_required()
     def delete_stock_market(id):
         user_identity = get_jwt_identity()
@@ -109,7 +109,7 @@ def construct_stock_market_controller(engine):
             'response': "deleted"
         }), HTTP_200_OK
 
-    @stock_market_controller.put('/<int:id>')
+    @stock_markets_controller.put('/<int:id>')
     @jwt_required()
     def update_stock_market(id):
         user_identity = get_jwt_identity()
@@ -167,4 +167,4 @@ def construct_stock_market_controller(engine):
             'NumberOfCompanies': number_of_companies
         }), HTTP_200_OK
 
-    return stock_market_controller
+    return stock_markets_controller
