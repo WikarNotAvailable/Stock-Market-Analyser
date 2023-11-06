@@ -20,12 +20,16 @@ def construct_auth_service(engine):
     @jwt_required(optional=True)
     def register():
         user_identity = get_jwt_identity()
+        if user_identity is not None and user_identity.get('usertype') == "Admin":
+            usertype_id = request.get_json().get('UsertypeID')
+        else:
+            usertype_id = 1
+
         nickname = request.get_json().get('Nickname', '')
         email = request.get_json().get('Email', '')
         phone_number = request.get_json().get('PhoneNumber', '')
         birth_date = request.get_json().get('BirthDate', '')
         password = request.get_json().get('Password', '')
-        usertype_id = request.get_json().get('UsertypeID')
 
         if len(nickname) < 3:
             return jsonify({'error': "Nickname is too short"}), HTTP_400_BAD_REQUEST
