@@ -9,7 +9,7 @@ from flask.json import jsonify
 import datetime
 import yfinance as yf
 from src.models.stock_market import StockMarket
-from src.services.stock_data_service import save_data_for_company
+from src.services.cache_stock_data_service import save_data_for_company
 
 
 def construct_companies_controller(engine):

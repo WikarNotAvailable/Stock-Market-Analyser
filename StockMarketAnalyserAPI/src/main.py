@@ -8,7 +8,7 @@ from src.controllers.users_controller import construct_users_controller
 from src.controllers.stock_markets_controller import construct_stock_markets_controller
 from src.controllers.companies_controller import construct_companies_controller
 from src.services.auth_service import construct_auth_service
-from src.services.stock_data_service import update_data_for_companies
+from src.services.cache_stock_data_service import update_data_for_companies
 import os
 
 app = Flask(__name__)
