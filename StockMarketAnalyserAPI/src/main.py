@@ -2,16 +2,13 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from src.services.engine_service import get_engine_from_settings
 from src.models.base import Base
-from src.models.company import Company
-from src.models.historical_stock_data import HistoricalStockData
-from src.models.stock_market import StockMarket
-from src.models.company_on_stock_market import association_table
 from flask_cors import CORS
 from src.controllers.usertypes_controller import construct_usertypes_controller
 from src.controllers.users_controller import construct_users_controller
 from src.controllers.stock_markets_controller import construct_stock_markets_controller
 from src.controllers.companies_controller import construct_companies_controller
 from src.services.auth_service import construct_auth_service
+from src.services.stock_data_service import update_data_for_companies
 import os
 
 app = Flask(__name__)
@@ -28,3 +25,8 @@ app.register_blueprint(construct_users_controller(get_engine_from_settings()))
 app.register_blueprint(construct_auth_service(get_engine_from_settings()))
 app.register_blueprint(construct_stock_markets_controller(get_engine_from_settings()))
 app.register_blueprint(construct_companies_controller(get_engine_from_settings()))
+update_data_for_companies(get_engine_from_settings())
+
+
+
+

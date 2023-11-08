@@ -7,8 +7,9 @@ from sqlalchemy import select, delete, update, exc
 from sqlalchemy.orm import Session
 from flask.json import jsonify
 import datetime
-
+import yfinance as yf
 from src.models.stock_market import StockMarket
+from src.services.stock_data_service import save_data_for_company
 
 
 def construct_companies_controller(engine):
@@ -27,6 +28,12 @@ def construct_companies_controller(engine):
         foundation_date = request.get_json().get('FoundationDate', '')
         description = request.get_json().get('Description', '')
         stock_markets_ids = request.get_json().get('StockMarkets', '')
+
+        all_data = yf.download(ticker_symbol, start='2023-01-01', end='2023-01-31')
+        if len(all_data) == 0:
+            return jsonify({
+                'error': 'Data for company of such ticker symbol was not found'
+            }), HTTP_404_NOT_FOUND
 
         try:
             datetime.date.fromisoformat(foundation_date)
@@ -65,6 +72,7 @@ def construct_companies_controller(engine):
                         raise Exception(str(error))
             session.refresh(company)
 
+        save_data_for_company(company.CompanyID, company.TickerSymbol, engine)
         return jsonify({
             'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
             'FoundationDate': company.FoundationDate, 'Description': company.Description,
