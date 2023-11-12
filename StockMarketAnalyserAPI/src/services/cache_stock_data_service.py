@@ -1,5 +1,5 @@
 from src.models.company import Company
-from sqlalchemy import select
+from sqlalchemy import select, exc
 from sqlalchemy.orm import Session
 from src.models.historical_stock_data import HistoricalStockData
 from datetime import date, timedelta
@@ -29,7 +29,8 @@ def update_data_for_companies(engine):
             recent_data_stmt = select(HistoricalStockData.Date).order_by(HistoricalStockData.Date.desc()).where(
                 HistoricalStockData.CompanyID == company[0])
             recent_data = session.execute(recent_data_stmt).first()
-            all_data = yf.download(company[1], recent_data[0] + timedelta(days=1), end=date.today())
+
+            all_data = yf.download(company[1], start=recent_data[0] + timedelta(days=1), end=date.today())
 
             if len(all_data) == 0:
                 print(f'There is no new data for company, ticker symbol: {company[1]}')
@@ -39,10 +40,12 @@ def update_data_for_companies(engine):
                                                       Low=one_day_data[3], Close=one_day_data[4],
                                                       AdjClose=one_day_data[5],
                                                       Volume=one_day_data[6], CompanyID=company[0])
-                    session.add(data_object)
-                    session.commit()
-
-
-
-
-
+                    try:
+                        session.add(data_object)
+                        session.commit()
+                    except exc.IntegrityError as error:
+                        session.rollback()
+                        if "UniqueViolation" in str(error):
+                            print(f'Already added data, ticker symbol: {company[1]}, date: {one_day_data[0]}')
+                        else:
+                            raise Exception(str(error))

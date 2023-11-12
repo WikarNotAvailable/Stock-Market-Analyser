@@ -9,6 +9,7 @@ from src.controllers.stock_markets_controller import construct_stock_markets_con
 from src.controllers.companies_controller import construct_companies_controller
 from src.services.auth_service import construct_auth_service
 from src.services.cache_stock_data_service import update_data_for_companies
+from src.services.stock_data_provider_service import construct_stock_data_provider_service
 import os
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(construct_users_controller(get_engine_from_settings()))
 app.register_blueprint(construct_auth_service(get_engine_from_settings()))
 app.register_blueprint(construct_stock_markets_controller(get_engine_from_settings()))
 app.register_blueprint(construct_companies_controller(get_engine_from_settings()))
+app.register_blueprint(construct_stock_data_provider_service(get_engine_from_settings()))
 update_data_for_companies(get_engine_from_settings())
 
 
