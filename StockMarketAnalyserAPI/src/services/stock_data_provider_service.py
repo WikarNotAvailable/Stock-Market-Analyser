@@ -160,12 +160,12 @@ def construct_stock_data_provider_service(engine):
         ema_200_first = 0.0
 
         for i in range(200):
-            if i <= 149:
+            if i > 49:
                 ema_200_first += all_stock_data[i][0]
-            elif i <= 173:
+            elif i > 25:
                 ema_50_first += all_stock_data[i][0]
                 ema_200_first += all_stock_data[i][0]
-            elif i <= 187:
+            elif i > 11:
                 ema_26_first += all_stock_data[i][0]
                 ema_50_first += all_stock_data[i][0]
                 ema_200_first += all_stock_data[i][0]
@@ -345,6 +345,103 @@ def construct_stock_data_provider_service(engine):
 
         return jsonify({
             'OnBalanceVolumes': on_balance_volumes
+        }), HTTP_200_OK
+
+    @stock_data_provider_service.get('/MACD/<int:company_id>')
+    def get_company_macd(company_id):
+        start = request.args.get('start')
+
+        if not start:
+            return jsonify({'error': "You have to pass start date"}), HTTP_400_BAD_REQUEST
+
+        try:
+            date.fromisoformat(start)
+        except ValueError:
+            return jsonify({
+                'error': 'Invalid date format'
+            }), HTTP_400_BAD_REQUEST
+
+        stmt = select(HistoricalStockData.Close, HistoricalStockData.Date) \
+            .where(HistoricalStockData.CompanyID == company_id).order_by(HistoricalStockData.Date.asc())
+
+        total_count_stmt = select(count(HistoricalStockData.DataID)).where(HistoricalStockData.CompanyID == company_id)
+
+        count_stmt = select(count(HistoricalStockData.DataID)) \
+            .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id))
+
+        with Session(engine) as session:
+            all_stock_data = session.execute(stmt).all()
+            total_records_count = session.execute(total_count_stmt).scalar()
+            records_count = session.execute(count_stmt).scalar()
+
+        smoothing_factor26 = 2 / (1 + 26)
+        smoothing_factor12 = 2 / (1 + 12)
+
+        ema_12_first = 0.0
+        ema_26_first = 0.0
+
+        for i in range(26):
+            if i > 11:
+                ema_26_first += all_stock_data[i][0]
+            else:
+                ema_26_first += all_stock_data[i][0]
+                ema_12_first += all_stock_data[i][0]
+
+        ema_12_first = ema_12_first / 12
+        ema_26_first = ema_26_first / 26
+
+        ema_12 = [{'ema12val': ema_12_first, 'Date': all_stock_data[11][1]}]
+        ema_26 = [{'ema26val': ema_26_first, 'Date': all_stock_data[25][1]}]
+
+        for i in range(12, total_records_count):
+            if i > 25:
+                ema_12.append({'ema12val': (all_stock_data[i][0] - ema_12[len(ema_12) - 1]['ema12val'])
+                                           * smoothing_factor12 + ema_12[len(ema_12) - 1]['ema12val'],
+                               'Date': all_stock_data[i][1]})
+
+                ema_26.append({'ema26val': (all_stock_data[i][0] - ema_26[len(ema_26) - 1]['ema26val'])
+                                           * smoothing_factor26 + ema_26[len(ema_26) - 1]['ema26val'],
+                               'Date': all_stock_data[i][1]})
+            else:
+                ema_12.append({'ema12val': (all_stock_data[i][0] - ema_12[len(ema_12) - 1]['ema12val'])
+                                           * smoothing_factor12 + ema_12[len(ema_12) - 1]['ema12val'],
+                               'Date': all_stock_data[i][1]})
+
+        ema_12_start_index = len(ema_12) - records_count if len(ema_12) - records_count >= 0 else 0
+        ema_26_start_index = len(ema_26) - records_count if len(ema_26) - records_count >= 0 else 0
+
+        ema_12_slice_arr = ema_12[ema_12_start_index:len(ema_12)]
+        ema_26_slice_arr = ema_26[ema_26_start_index:len(ema_26)]
+
+        for i in range(len(ema_12_slice_arr)):
+            if ema_12_slice_arr[i]['Date'] == ema_26_slice_arr[0]['Date']:
+                macd_start_index = i
+                break
+
+        ema_12_slice_arr = ema_12_slice_arr[macd_start_index:len(ema_12_slice_arr)]
+        macd_arr = []
+        for i in range(len(ema_12_slice_arr)):
+            macd_arr.append({'macdval': ema_12_slice_arr[i]['ema12val'] - ema_26_slice_arr[i]['ema26val'],
+                             'Date': ema_12_slice_arr[i]['Date']})
+
+        signal_arr = []
+        if len(macd_arr) > 9:
+            smoothing_factor9 = 2 / (1 + 9)
+            signal_line_first = 0.0
+
+            for i in macd_arr[0:9]:
+                signal_line_first += i['macdval']
+            signal_line_first = signal_line_first / 9
+            signal_arr.append({'signalval': signal_line_first, 'Date': macd_arr[8]['Date']})
+
+            for i in range(9, len(macd_arr)):
+                signal_arr.append({'signalval': (macd_arr[i]['macdval'] - signal_arr[len(signal_arr) - 1]['signalval'])
+                                           * smoothing_factor9 + signal_arr[len(signal_arr) - 1]['signalval'],
+                               'Date': macd_arr[i]['Date']})
+
+        return jsonify({
+            'MACD': macd_arr,
+            'SignalLine': signal_arr
         }), HTTP_200_OK
 
     return stock_data_provider_service
