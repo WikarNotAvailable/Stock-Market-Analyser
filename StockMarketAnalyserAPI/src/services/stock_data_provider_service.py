@@ -9,6 +9,7 @@ from flask.json import jsonify
 from datetime import date
 from sqlalchemy import and_
 from src.models.historical_stock_data import HistoricalStockData
+import statistics
 
 
 def construct_stock_data_provider_service(engine):
@@ -92,7 +93,7 @@ def construct_stock_data_provider_service(engine):
 
         rsi = 100 * avg_raise / (avg_raise + avg_fall)
         return jsonify({
-            'RSI': rsi
+            'RSI': round(rsi, 2)
         }), HTTP_200_OK
 
     @stock_data_provider_service.get('/SMA/<int:company_id>')
@@ -119,7 +120,7 @@ def construct_stock_data_provider_service(engine):
                 sma_200_sum += all_stock_data[i][0]
 
         return jsonify({
-            'SMA20': sma_20_sum / 20, 'SMA50': sma_50_sum / 50, 'SMA200': sma_200_sum / 200
+            'SMA20': round(sma_20_sum / 20, 2), 'SMA50': round(sma_50_sum / 50, 2), 'SMA200': round(sma_200_sum / 200, 2)
         }), HTTP_200_OK
 
     @stock_data_provider_service.get('/EMA/<int:company_id>')
@@ -233,10 +234,8 @@ def construct_stock_data_provider_service(engine):
         ema_200_start_index = len(ema_200) - records_count if len(ema_200) - records_count >= 0 else 0
 
         return jsonify({
-            'EMA12': ema_12[ema_12_start_index:len(ema_12)],
-            'EMA26': ema_26[ema_26_start_index:len(ema_26)],
-            'EMA50': ema_50[ema_50_start_index:len(ema_50)],
-            'EMA200': ema_200[ema_200_start_index:len(ema_200)]
+            'EMA12': ema_12[ema_12_start_index:len(ema_12)], 'EMA26': ema_26[ema_26_start_index:len(ema_26)],
+            'EMA50': ema_50[ema_50_start_index:len(ema_50)], 'EMA200': ema_200[ema_200_start_index:len(ema_200)]
         }), HTTP_200_OK
 
     @stock_data_provider_service.get('/stochastic-oscillator/<int:company_id>')
@@ -440,8 +439,47 @@ def construct_stock_data_provider_service(engine):
                                'Date': macd_arr[i]['Date']})
 
         return jsonify({
-            'MACD': macd_arr,
-            'SignalLine': signal_arr
+            'MACD': macd_arr, 'SignalLine': signal_arr
+        }), HTTP_200_OK
+
+    @stock_data_provider_service.get('/stats/<int:company_id>')
+    def get_company_statistics(company_id):
+        start = request.args.get('start')
+
+        if not start:
+            return jsonify({'error': "You have to pass start date"}), HTTP_400_BAD_REQUEST
+
+        try:
+            date.fromisoformat(start)
+        except ValueError:
+            return jsonify({
+                'error': 'Invalid date format'
+            }), HTTP_400_BAD_REQUEST
+
+        stmt = select(HistoricalStockData.Close, HistoricalStockData.Volume, HistoricalStockData.Date) \
+            .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id)) \
+            .order_by(HistoricalStockData.Date.asc())
+
+        with Session(engine) as session:
+            all_stock_data = session.execute(stmt).all()
+
+        close_prices = []
+        volumes_sum = 0.0
+
+        change = ((all_stock_data[len(all_stock_data)-1][0] - all_stock_data[0][0]) / all_stock_data[0][0]) * 100
+
+        for one_stock_data in all_stock_data:
+            close_prices.append(one_stock_data[0])
+            volumes_sum += one_stock_data[1]
+
+        low = min(close_prices)
+        high = max(close_prices)
+        avg_volume = volumes_sum/len(all_stock_data)
+        close_stdev = statistics.stdev(close_prices)
+
+        return jsonify({
+            'ChangePercent': round(change, 2), 'Low': round(low, 2), 'High': round(high, 2),
+            'AvgVolume': round(avg_volume, 2), 'Close_stdev': round(close_stdev, 2)
         }), HTTP_200_OK
 
     return stock_data_provider_service

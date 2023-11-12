@@ -12,9 +12,10 @@ def save_data_for_company(company_id, ticker_symbol, engine):
 
     with Session(engine) as session:
         for one_day_data in all_data:
-            data_object = HistoricalStockData(Date=one_day_data[0], Open=one_day_data[1], High=one_day_data[2],
-                                              Low=one_day_data[3], Close=one_day_data[4], AdjClose=one_day_data[5],
-                                              Volume=one_day_data[6], CompanyID=company_id)
+            data_object = HistoricalStockData(Date=one_day_data[0], Open=round(one_day_data[1], 2),
+                                              High=round(one_day_data[2], 2), Low=round(one_day_data[3], 2),
+                                              Close=round(one_day_data[4], 2), AdjClose=round(one_day_data[5], 2),
+                                              Volume=round(one_day_data[6], 2), CompanyID=company_id)
             session.add(data_object)
             session.commit()
 
@@ -36,10 +37,10 @@ def update_data_for_companies(engine):
                 print(f'There is no new data for company, ticker symbol: {company[1]}')
             else:
                 for one_day_data in all_data.reset_index().values.tolist():
-                    data_object = HistoricalStockData(Date=one_day_data[0], Open=one_day_data[1], High=one_day_data[2],
-                                                      Low=one_day_data[3], Close=one_day_data[4],
-                                                      AdjClose=one_day_data[5],
-                                                      Volume=one_day_data[6], CompanyID=company[0])
+                    data_object = HistoricalStockData(Date=one_day_data[0], Open=round(one_day_data[1], 2),
+                                                      High=round(one_day_data[2], 2), Low=round(one_day_data[3], 2),
+                                                      Close=round(one_day_data[4], 2), AdjClose=round(one_day_data[5], 2),
+                                                      Volume=round(one_day_data[6], 2), CompanyID=company[0])
                     try:
                         session.add(data_object)
                         session.commit()
