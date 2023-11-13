@@ -77,21 +77,22 @@ def construct_stock_data_provider_service(engine):
 
     @stock_data_provider_service.get('/RSI/<int:company_id>')
     def get_company_rsi(company_id):
-        stmt = select(HistoricalStockData.Close) \
-            .where(HistoricalStockData.CompanyID == company_id).order_by(HistoricalStockData.Date.desc()).limit(14)
+        stmt = select(HistoricalStockData.Close, HistoricalStockData.Date) \
+            .where(HistoricalStockData.CompanyID == company_id).order_by(HistoricalStockData.Date.desc()).limit(15)
 
         with Session(engine) as session:
             all_stock_data = session.execute(stmt).all()
 
         avg_raise = 0.0
         avg_fall = 0.0
-        for i in reversed(range(1, 14)):
-            if all_stock_data[i][0] - all_stock_data[i - 1][0] >= 0:
-                avg_raise += all_stock_data[i][0] - all_stock_data[i - 1][0]
-            else:
-                avg_fall -= all_stock_data[i][0] - all_stock_data[i - 1][0]
 
-        rsi = 100 * avg_raise / (avg_raise + avg_fall)
+        for i in reversed(range(0, 14)):
+            if all_stock_data[i][0] - all_stock_data[i + 1][0] >= 0:
+                avg_raise += all_stock_data[i][0] - all_stock_data[i + 1][0]
+            else:
+                avg_fall -= all_stock_data[i][0] - all_stock_data[i + 1][0]
+
+        rsi = 100 * (avg_raise / (avg_raise + avg_fall))
         return jsonify({
             'RSI': round(rsi, 2)
         }), HTTP_200_OK
@@ -406,22 +407,16 @@ def construct_stock_data_provider_service(engine):
                                            * smoothing_factor12 + ema_12[len(ema_12) - 1]['ema12val'],
                                'Date': all_stock_data[i][1]})
 
-        ema_12_start_index = len(ema_12) - records_count if len(ema_12) - records_count >= 0 else 0
-        ema_26_start_index = len(ema_26) - records_count if len(ema_26) - records_count >= 0 else 0
-
-        ema_12_slice_arr = ema_12[ema_12_start_index:len(ema_12)]
-        ema_26_slice_arr = ema_26[ema_26_start_index:len(ema_26)]
-
-        for i in range(len(ema_12_slice_arr)):
-            if ema_12_slice_arr[i]['Date'] == ema_26_slice_arr[0]['Date']:
+        for i in range(len(ema_12)):
+            if ema_12[i]['Date'] == ema_26[0]['Date']:
                 macd_start_index = i
                 break
 
-        ema_12_slice_arr = ema_12_slice_arr[macd_start_index:len(ema_12_slice_arr)]
+        ema_12 = ema_12[macd_start_index:len(ema_12)]
         macd_arr = []
-        for i in range(len(ema_12_slice_arr)):
-            macd_arr.append({'macdval': ema_12_slice_arr[i]['ema12val'] - ema_26_slice_arr[i]['ema26val'],
-                             'Date': ema_12_slice_arr[i]['Date']})
+        for i in range(len(ema_12)):
+            macd_arr.append({'macdval': ema_12[i]['ema12val'] - ema_26[i]['ema26val'],
+                             'Date': ema_12[i]['Date']})
 
         signal_arr = []
         if len(macd_arr) > 9:
@@ -438,8 +433,24 @@ def construct_stock_data_provider_service(engine):
                                            * smoothing_factor9 + signal_arr[len(signal_arr) - 1]['signalval'],
                                'Date': macd_arr[i]['Date']})
 
+        for i in range(len(macd_arr)):
+            if macd_arr[i]['Date'] == signal_arr[0]['Date']:
+                histogram_start_index = i
+                break
+
+        macd_arr_part = macd_arr[histogram_start_index:len(macd_arr)]
+        histogram_arr = []
+        for i in range(len(macd_arr_part)):
+            histogram_arr.append({'histogramval': macd_arr_part[i]['macdval'] - signal_arr[i]['signalval'],
+                             'Date': macd_arr_part[i]['Date']})
+
+        final_macd_index = len(macd_arr) - records_count if len(macd_arr) - records_count >= 0 else 0
+        final_signal_index = len(signal_arr) - records_count if len(signal_arr) - records_count >= 0 else 0
+        final_histogram_index = len(histogram_arr) - records_count if len(histogram_arr) - records_count >= 0 else 0
+
         return jsonify({
-            'MACD': macd_arr, 'SignalLine': signal_arr
+            'MACD': macd_arr[final_macd_index:len(macd_arr)], 'SignalLine': signal_arr[final_signal_index:len(signal_arr)],
+            'Histogram': histogram_arr[final_histogram_index:len(histogram_arr)]
         }), HTTP_200_OK
 
     @stock_data_provider_service.get('/stats/<int:company_id>')
