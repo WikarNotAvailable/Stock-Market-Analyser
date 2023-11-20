@@ -474,6 +474,7 @@ def construct_stock_data_provider_service(engine):
         with Session(engine) as session:
             all_stock_data = session.execute(stmt).all()
 
+        print(len(all_stock_data))
         close_prices = []
         volumes_sum = 0.0
 
@@ -488,9 +489,24 @@ def construct_stock_data_provider_service(engine):
         avg_volume = volumes_sum/len(all_stock_data)
         close_stdev = statistics.stdev(close_prices)
 
+        stmt = select(HistoricalStockData.Close) \
+            .where(HistoricalStockData.CompanyID == company_id)\
+            .order_by(HistoricalStockData.Date.desc()).limit(22)
+
+        with Session(engine) as session:
+            last22_stock_data = session.execute(stmt).all()
+
+        last_21simple_return = []
+        for i in reversed(range(21)):
+            last_21simple_return.append(100*((last22_stock_data[i+1][0] - last22_stock_data[i][0])/last22_stock_data[i+1][0]))
+
+        simple_return_mean = statistics.mean(last_21simple_return)
+        simple_return_stdev = statistics.stdev(last_21simple_return)
+
         return jsonify({
             'ChangePercent': round(change, 2), 'Low': round(low, 2), 'High': round(high, 2),
-            'AvgVolume': round(avg_volume, 2), 'Close_stdev': round(close_stdev, 2)
+            'AvgVolume': round(avg_volume, 2), 'CloseStdev': round(close_stdev, 2), 'SimpleReturnMean21': round(simple_return_mean, 2),
+            'SimpleReturnStdev21': round(simple_return_stdev, 2)
         }), HTTP_200_OK
 
     return stock_data_provider_service
