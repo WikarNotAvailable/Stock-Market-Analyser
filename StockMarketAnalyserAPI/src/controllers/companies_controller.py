@@ -10,6 +10,7 @@ import datetime
 import yfinance as yf
 from src.models.stock_market import StockMarket
 from src.services.cache_stock_data_service import save_data_for_company
+from src.services.prediction_service import create_model
 
 
 def construct_companies_controller(engine):
@@ -73,6 +74,7 @@ def construct_companies_controller(engine):
             session.refresh(company)
 
         save_data_for_company(company.CompanyID, company.TickerSymbol, engine)
+        create_model(ticker_symbol)
         return jsonify({
             'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
             'FoundationDate': company.FoundationDate, 'Description': company.Description,

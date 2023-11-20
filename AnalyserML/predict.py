@@ -19,7 +19,6 @@ loaded_x_sc = joblib.load('AAPL_scalerX_object.pkl')
 data_scaled = loaded_x_sc.transform(data)
 
 X_predict = []
-lookback_period = 60
 
 for column_number in range(2):
     X_predict.append([])

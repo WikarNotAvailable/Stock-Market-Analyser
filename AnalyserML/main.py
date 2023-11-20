@@ -1,6 +1,5 @@
 import joblib
 import numpy as np
-import pandas as pd
 from keras.src.layers import Dropout
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
@@ -9,7 +8,6 @@ from keras.layers import LSTM, Dense
 from keras import optimizers, Sequential
 import yfinance as yf
 
-pd.set_option('display.max_columns', None)
 data = yf.download('AAPL', start='2002-10-01', end='2022-10-01')
 
 data['Simple return'] = (100 * (data['Close']).diff() / data['Close'].shift(1))
@@ -81,7 +79,7 @@ y_test = sc_targets.inverse_transform(y_test)
 plt.figure(figsize=(16, 8))
 plt.title("AAPL Simple Return Standard Deviation predictions test")
 plt.ylabel("Standard deviation (21days) of simple return", fontsize=18)
-plt.xlabel("Trading days (2020-03-01 - 2022-10-01)", fontsize=18)
+plt.xlabel("Trading days (2020-03-01 - 2022-10-01) (without first lookback period)", fontsize=18)
 plt.plot(y_test, color='black', label='test')
 plt.plot(y_pred, color='green', label='predictions')
 plt.legend()
