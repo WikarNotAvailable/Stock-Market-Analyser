@@ -1,81 +1,90 @@
-import math
+import joblib
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from keras.src.activations import relu
-from sklearn.model_selection import TimeSeriesSplit
+from keras.src.layers import Dropout
+from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from keras.models import Sequential
+from keras.src.saving.saving_api import save_model
 from keras.layers import LSTM, Dense
-from keras.utils import plot_model
+from keras import optimizers, Sequential
+import yfinance as yf
 
 pd.set_option('display.max_columns', None)
-dataset = pd.read_csv("../../Stock-Market-Dataset/SP500Divide/A.csv", index_col=0)
-print(dataset.head(10))
+data = yf.download('AAPL', start='2002-10-01', end='2022-10-01')
 
-"""
-plt.figure(figsize=(16,8))
-plt.title('Close Price History')
-plt.plot(dataset['Date'],dataset['Close'], label='Close Price')
-plt.xlabel('Date', fontsize=18)
-plt.ylabel("Close Price USD ($)'", fontsize=18)
-plt.xticks(dataset['Date'][::365],  rotation='vertical')
-plt.show()
-"""
+data['Simple return'] = (100 * (data['Close']).diff() / data['Close'].shift(1))
+data['Simple return 21std'] = data['Simple return'].rolling(21).std()
+data['Simple return 60std'] = data['Simple return'].rolling(60).std()
+data['Target'] = data['Simple return 21std'].shift(-1)
 
-data = dataset.filter(['Close'])
-dataset = data.values
-training_data_len = math.ceil(len(dataset) * .8)
+data.dropna(inplace=True)
 
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_data = scaler.fit_transform(dataset)
+training_data = data[data.index < '2020-03-01']  # 86,6%
+test_data = data[data.index >= '2020-03-01']  # 13,4%
 
-train_data = scaled_data[0:training_data_len, :]
-x_train = []
-y_train = []
+training_data.reset_index(inplace=True)
+test_data.reset_index(inplace=True)
+training_data.drop(['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Simple return'], axis=1, inplace=True)
+test_data.drop(['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'Simple return'], axis=1, inplace=True)
 
-for i in range(60, len(train_data)):
-    x_train.append(train_data[i-60:i,0])
-    y_train.append(train_data[i,0])
+training_data_targets = training_data['Target']
+test_data_targets = test_data['Target']
+training_data.drop(['Target'], axis=1, inplace=True)
+test_data.drop(['Target'], axis=1, inplace=True)
 
-x_train, y_train = np.array(x_train), np.array(y_train)
-print(x_train.shape)
-x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-print(x_train.shape)
+sc = MinMaxScaler(feature_range=(0, 1))
+training_data_scaled = sc.fit_transform(training_data)
+test_data_scaled = sc.transform(test_data)
+joblib.dump(sc, 'AAPL_scalerX_object.pkl')
+
+sc_targets = MinMaxScaler(feature_range=(0, 1))
+training_data_targets = np.reshape(training_data_targets, (len(training_data_targets), 1))
+test_data_targets = np.reshape(test_data_targets, (len(test_data_targets), 1))
+training_data_targets_scaled = sc_targets.fit_transform(training_data_targets)
+test_data_targets_scaled = sc_targets.transform(test_data_targets)
+joblib.dump(sc_targets, 'AAPL_scalerY_object.pkl')
+
+X_train = []
+X_test = []
+lookback_period = 60
+
+for column_number in range(2):
+    X_train.append([])
+    X_test.append([])
+    for i in range(lookback_period, training_data_scaled.shape[0]):
+        X_train[column_number].append(training_data_scaled[i - lookback_period:i, column_number])
+    for i in range(lookback_period, test_data_scaled.shape[0]):
+        X_test[column_number].append(test_data_scaled[i - lookback_period:i, column_number])
+
+X_train = np.moveaxis(X_train, [0], [2])
+X_test = np.moveaxis(X_test, [0], [2])
+
+X_train, y_train = np.array(X_train), np.array(training_data_targets_scaled[lookback_period:, 0])
+X_test, y_test = np.array(X_test), np.array(test_data_targets_scaled[lookback_period:, 0])
+
+y_train = np.reshape(y_train, (len(y_train), 1))
+y_test = np.reshape(y_test, (len(y_test), 1))
 
 model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-model.add(LSTM(50, return_sequences=False))
-model.add(Dense(25))
-model.add(Dense(1))
+model.add(LSTM(100, input_shape=(lookback_period, 2)))
+model.add(Dense(32, activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1, activation='linear'))
+adam = optimizers.Adam()
+model.compile(optimizer=adam, loss='mse', metrics=['mean_absolute_error'])
+model.fit(x=X_train, y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
+save_model(model, "AAPL.h5")
 
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_squared_error'])
-model.fit(x_train, y_train, batch_size=32, epochs=1)
-
-test_data = scaled_data[training_data_len -60:, :]
-x_test = []
-y_test = dataset[training_data_len:, :]
-for i in range(60, len(test_data)):
-    x_test.append(test_data[i-60:i,0])
-
-x_test = np.array(x_test)
-x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-
-predictions = model.predict(x_test)
-predictions = scaler.inverse_transform(predictions)
-
-rmse = np.sqrt( np.mean(predictions - y_test)**2 )
-print(rmse)
-
-train = data[:training_data_len]
-valid = data[training_data_len:]
-valid['Predictions'] = predictions
-
-plt.figure(figsize=(16,8))
-plt.title("Model")
-plt.xlabel("Date", fontsize=18)
-plt.ylabel("Close Price USD ($)", fontsize=18)
-plt.plot(train['Close'])
-plt.plot(valid[['Close', 'Predictions']])
-plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
+y_pred = sc_targets.inverse_transform(model.predict(X_test))
+y_test = sc_targets.inverse_transform(y_test)
+plt.figure(figsize=(16, 8))
+plt.title("AAPL Simple Return Standard Deviation predictions test")
+plt.ylabel("Standard deviation (21days) of simple return", fontsize=18)
+plt.xlabel("Trading days (2020-03-01 - 2022-10-01)", fontsize=18)
+plt.plot(y_test, color='black', label='test')
+plt.plot(y_pred, color='green', label='predictions')
+plt.legend()
+plt.savefig('AAPL_PLOT.png')
 plt.show()
+
