@@ -474,7 +474,6 @@ def construct_stock_data_provider_service(engine):
         with Session(engine) as session:
             all_stock_data = session.execute(stmt).all()
 
-        print(len(all_stock_data))
         close_prices = []
         volumes_sum = 0.0
 

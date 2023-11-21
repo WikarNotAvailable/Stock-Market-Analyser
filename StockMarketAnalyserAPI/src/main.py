@@ -23,15 +23,16 @@ app.config.from_mapping(
 JWTManager(app)
 CORS(app)
 
-Base.metadata.create_all(get_engine_from_settings(), checkfirst=True)
-app.register_blueprint(construct_usertypes_controller(get_engine_from_settings()))
-app.register_blueprint(construct_users_controller(get_engine_from_settings()))
-app.register_blueprint(construct_auth_service(get_engine_from_settings()))
-app.register_blueprint(construct_stock_markets_controller(get_engine_from_settings()))
-app.register_blueprint(construct_companies_controller(get_engine_from_settings()))
-app.register_blueprint(construct_stock_data_provider_service(get_engine_from_settings()))
-app.register_blueprint(construct_prediction_service(get_engine_from_settings()))
-update_data_for_companies(get_engine_from_settings())
+engine = get_engine_from_settings()
+Base.metadata.create_all(engine, checkfirst=True)
+app.register_blueprint(construct_usertypes_controller(engine))
+app.register_blueprint(construct_users_controller(engine))
+app.register_blueprint(construct_auth_service(engine))
+app.register_blueprint(construct_stock_markets_controller(engine))
+app.register_blueprint(construct_companies_controller(engine))
+app.register_blueprint(construct_stock_data_provider_service(engine))
+app.register_blueprint(construct_prediction_service(engine))
+update_data_for_companies(engine)
 
 
 
