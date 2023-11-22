@@ -1,6 +1,5 @@
 from flask import Blueprint, request
-from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, \
-    HTTP_401_UNAUTHORIZED
+from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from src.models.user import User
 from src.models.usertype import Usertype
 from sqlalchemy import exc, select
@@ -100,7 +99,7 @@ def construct_auth_service(engine):
             if user is None:
                 return jsonify({
                     'error': 'User with passed email was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
             if check_password_hash(user.Password, password):
                 usertype = session.get(Usertype, user.UsertypeID)
@@ -128,7 +127,7 @@ def construct_auth_service(engine):
             if user is None:
                 return jsonify({
                     'error': 'User with passed email was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
             usertype = session.get(Usertype, user.UsertypeID)
 
