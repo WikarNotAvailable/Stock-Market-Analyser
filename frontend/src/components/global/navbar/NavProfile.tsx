@@ -1,5 +1,5 @@
 import { Flex, Text, useDisclosure, useToast } from "@chakra-ui/react";
-import React, { FC } from "react";
+import { FC } from "react";
 import { MdAccountCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
 import useUserContext from "../../../provider/user";
@@ -8,6 +8,7 @@ export const NavProfile: FC = () => {
   const { logOut, isLoggedIn, user } = useUserContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+
   return (
     <Flex
       position="relative"

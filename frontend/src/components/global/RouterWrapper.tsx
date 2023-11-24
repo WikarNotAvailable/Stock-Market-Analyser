@@ -8,6 +8,7 @@ import { Navbar } from "./navbar/Navbar";
 import api from "../../api/api";
 import useUserContext from "../../provider/user";
 import { Footer } from "./footer/Footer";
+import { Register } from "../../pages/Register";
 
 export const RouterWrapper = () => {
   const { user, update } = useUserContext();
@@ -27,10 +28,11 @@ export const RouterWrapper = () => {
       <BrowserRouter>
         <Flex maxW="100vw" minH="100vh" overflow="hidden" flexDir="column">
           <Navbar />
-          <Flex mt="100px" align="center" flexDir="column" flex="1">
+          <Flex mt="100px" align="center" flexDir="column" flex="1" mb="100px">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
             </Routes>
           </Flex>
           <Footer />

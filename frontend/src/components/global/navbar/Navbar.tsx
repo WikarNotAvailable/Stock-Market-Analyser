@@ -28,6 +28,7 @@ export const Navbar = () => {
             text="Manage&nbsp;Stock&nbsp;Markets"
             location="/ManageStockMarkets"
           />
+          <NavLink text="Stock&nbsp;Data" location="/StockData" />
           <NavLink text="Companies" location="/Companies" />
           <NavLink text="Stock&nbsp;Markets" location="/StockMarkets" />
           <NavProfile />

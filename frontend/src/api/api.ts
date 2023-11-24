@@ -11,7 +11,7 @@ class ApiService {
     },
   };
 
-  public async postUser(data: any) {
+  public async register(data: any) {
     const req = await axios.post(
       `${this.baseUrl}/auth/register`,
       data,

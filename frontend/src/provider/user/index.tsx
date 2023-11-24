@@ -37,7 +37,17 @@ export const UserContextProvider = ({
   useEffect(() => {
     if (userStorage !== null) {
       setIsLoggedIn(true);
-      setUser(userStorage.user);
+      const user: User = {
+        nickname: userStorage.nickname,
+        email: userStorage.email,
+        phoneNumber: userStorage.phoneNumber,
+        birthDate: userStorage.birthDate,
+        userType: userStorage.userType,
+        userID: userStorage.userID,
+        JWT: userStorage.JWT,
+        refresh: userStorage.refresh,
+      };
+      setUser(user);
     }
   }, []);
 
