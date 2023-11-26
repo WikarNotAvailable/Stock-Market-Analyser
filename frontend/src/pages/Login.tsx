@@ -4,6 +4,7 @@ import useUserContext, { User } from "../provider/user";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { Input } from "../components/shared/Input";
+import { LoggingState } from "../provider/user";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn === LoggingState.Logged) {
       navigate("/");
     }
   }, [isLoggedIn]);
@@ -65,14 +66,12 @@ export const Login = () => {
           refresh: res.user.refresh,
         };
         logIn(user);
-        setIsLoading(false);
         navigate("/");
       } catch (error: any) {
         if (
           error.response.request.status == 400 ||
           error.response.request.status == 401
         ) {
-          setIsLoading(false);
           toast({
             title: "Wrong credentials. Try again.",
             status: "error",
@@ -82,6 +81,7 @@ export const Login = () => {
           });
         }
       }
+      setIsLoading(false);
     }
   };
 

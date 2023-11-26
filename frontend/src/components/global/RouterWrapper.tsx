@@ -9,6 +9,7 @@ import api from "../../api/api";
 import useUserContext from "../../provider/user";
 import { Footer } from "./footer/Footer";
 import { Register } from "../../pages/Register";
+import { Profile } from "../../pages/Profile";
 
 export const RouterWrapper = () => {
   const { user, update } = useUserContext();
@@ -17,7 +18,7 @@ export const RouterWrapper = () => {
     const interval = setInterval(async () => {
       if (user) {
         const res = await api.refresh({ refresh: user?.refresh });
-        update({ ...user, jwt: res.access });
+        update({ ...user, JWT: res.access });
       }
     }, 300000);
     return () => clearInterval(interval);
@@ -33,6 +34,7 @@ export const RouterWrapper = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
             </Routes>
           </Flex>
           <Footer />

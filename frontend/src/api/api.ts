@@ -37,6 +37,35 @@ class ApiService {
     );
     return req.data;
   }
+
+  public async updateUser(data: any, userID: number) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.put(
+      `${this.baseUrl}/users/${userID}`,
+      data,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async checkUserPassword(data: any, userID: number) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.post(
+      `${this.baseUrl}/users/check-password/${userID}`,
+      data,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async deleteUser(data: any, userID: number) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.delete(
+      `${this.baseUrl}/users/${userID}`,
+      this.config
+    );
+    return req.data;
+  }
 }
 
 const api = new ApiService();

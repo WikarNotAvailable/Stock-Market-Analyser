@@ -7,7 +7,7 @@ from sqlalchemy import exc, select, delete, update
 from sqlalchemy.orm import Session
 from flask.json import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import phonenumbers
 import validators
 import datetime
@@ -59,6 +59,30 @@ def construct_users_controller(engine):
              'UserID': user.UserID, 'Nickname': user.Nickname, 'Email': user.Email, 'PhoneNumber': user.PhoneNumber,
              'BirthDate': user.BirthDate, 'Usertype': usertype.Usertype
         }), HTTP_200_OK
+
+    @users_controller.post('/check-password/<int:id>')
+    @jwt_required()
+    def check_password(id):
+        user_identity = get_jwt_identity()
+        if user_identity.get('userid') != id:
+            return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
+
+        password = request.get_json().get('Password', '')
+
+        stmt = select(User).where(User.UserID == id)
+
+        with Session(engine) as session:
+            user = session.execute(stmt).scalar()
+
+            if user is None:
+                return jsonify({
+                    'error': 'User with passed email was not found in database'
+                }), HTTP_400_BAD_REQUEST
+
+        if check_password_hash(user.Password, password):
+            return jsonify({'isCurrentPassword': True}), HTTP_200_OK
+        else:
+            return jsonify({'isCurrentPassword': False}), HTTP_200_OK
 
     @users_controller.delete('/<int:id>')
     @jwt_required()

@@ -11,8 +11,14 @@ export type User = {
   refresh: string;
 };
 
+export enum LoggingState {
+  Logged = "Logged",
+  NotLogged = "NotLogged",
+  NotCheckedYet = "NotCheckedYet",
+}
+
 const UserContext = createContext({
-  isLoggedIn: false,
+  isLoggedIn: LoggingState.NotCheckedYet,
   user: null as User | null,
   logIn: (d: User) => {},
   logOut: () => {},
@@ -25,18 +31,20 @@ export const UserContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<LoggingState>(
+    LoggingState.NotCheckedYet
+  );
   const [userStorage, setUserStorage] = useLocalStorage<any>("user", null);
 
   const handleLogin = (user: User) => {
-    setIsLoggedIn(true);
+    setIsLoggedIn(LoggingState.Logged);
     setUser(user);
     setUserStorage(user);
   };
 
   useEffect(() => {
     if (userStorage !== null) {
-      setIsLoggedIn(true);
+      setIsLoggedIn(LoggingState.Logged);
       const user: User = {
         nickname: userStorage.nickname,
         email: userStorage.email,
@@ -48,18 +56,20 @@ export const UserContextProvider = ({
         refresh: userStorage.refresh,
       };
       setUser(user);
+    } else {
+      setIsLoggedIn(LoggingState.NotLogged);
     }
   }, []);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    setIsLoggedIn(LoggingState.NotLogged);
     setUser(null);
     setUserStorage(null);
   };
 
   const handleUpdate = (user: User) => {
     if (user !== null) {
-      setIsLoggedIn(true);
+      setIsLoggedIn(LoggingState.Logged);
       setUser(user);
       setUserStorage(user);
     }

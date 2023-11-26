@@ -1,9 +1,10 @@
 import { Button, Flex, Link, Text, useToast } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../components/shared/Input";
 import useUserContext, { User } from "../provider/user";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { LoggingState } from "../provider/user";
 
 export const Register = () => {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ export const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn === LoggingState.Logged) {
       navigate("/");
     }
   }, [isLoggedIn]);
@@ -115,11 +116,9 @@ export const Register = () => {
           refresh: res.user.refresh,
         };
         logIn(user);
-        setIsLoading(false);
         navigate("/");
       } catch (error: any) {
         if (error.response.request.status == 400) {
-          setIsLoading(false);
           toast({
             title: "Email, nickname or phone number is already used in base",
             status: "error",
@@ -129,6 +128,7 @@ export const Register = () => {
           });
         }
       }
+      setIsLoading(false);
     }
   };
   return (
@@ -159,7 +159,7 @@ export const Register = () => {
       <Input
         width="20vw"
         type="date"
-        heading="Birthday date"
+        heading="Birthday Date"
         value={birthDate}
         onChange={onChangeBirthDate}
       />
