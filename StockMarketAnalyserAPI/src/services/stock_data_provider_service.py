@@ -39,14 +39,15 @@ def construct_stock_data_provider_service(engine):
             is_paged = True
             stmt = select(HistoricalStockData) \
                 .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id)) \
-                .limit(per_page).offset((page - 1) * per_page)
+                .order_by(HistoricalStockData.Date.desc()).limit(per_page).offset((page - 1) * per_page)
 
             count_stmt = select(count(HistoricalStockData.DataID)) \
                 .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id))
         else:
             is_paged = False
             stmt = select(HistoricalStockData) \
-                .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id))
+                .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id))\
+                .order_by(HistoricalStockData.Date.desc())
 
         with Session(engine) as session:
             all_stock_data = session.execute(stmt).scalars().all()

@@ -66,6 +66,20 @@ class ApiService {
     );
     return req.data;
   }
+
+  public async getCompanies() {
+    const req = await axios.get(`${this.baseUrl}/companies/`, this.config);
+    return req.data;
+  }
+
+  public async getStockData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/stock-data/${data.companyID}?page=${data.page}&per_page=50&start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
 }
 
 const api = new ApiService();

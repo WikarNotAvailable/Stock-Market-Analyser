@@ -76,7 +76,7 @@ def construct_companies_controller(engine):
         save_data_for_company(company.CompanyID, company.TickerSymbol, engine)
         create_model(ticker_symbol)
         return jsonify({
-            'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+            'CompanyID': company.CompanyID, 'Name': company.Name, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
             'FoundationDate': company.FoundationDate, 'Description': company.Description,
             'StockMarkets': stock_markets_tuples
         }), HTTP_201_CREATED
@@ -95,7 +95,7 @@ def construct_companies_controller(engine):
                     stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
 
                 data.append(
-                    {'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+                    {'CompanyID': company.CompanyID, 'Name': company.Name, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
                      'FoundationDate': company.FoundationDate, 'Description': company.Description,
                      'StockMarkets': stock_markets_tuples})
 
@@ -119,7 +119,7 @@ def construct_companies_controller(engine):
                 stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
 
         return jsonify({
-            'CompanyID': company.CompanyID, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
+            'CompanyID': company.CompanyID, 'Name': company.Name, 'TickerSymbol': company.TickerSymbol, 'Country': company.Country,
             'FoundationDate': company.FoundationDate, 'Description': company.Description,
             'StockMarkets': stock_markets_tuples
         }), HTTP_200_OK
@@ -223,7 +223,7 @@ def construct_companies_controller(engine):
                     raise Exception(str(error))
 
         return jsonify({
-            'CompanyID': id, 'TickerSymbol': ticker_symbol, 'Country': country, 'FoundationDate': foundation_date,
+            'CompanyID': id, 'Name': name, 'TickerSymbol': ticker_symbol, 'Country': country, 'FoundationDate': foundation_date,
             'Description': description, 'StockMarkets': stock_markets_tuples
         }), HTTP_200_OK
 

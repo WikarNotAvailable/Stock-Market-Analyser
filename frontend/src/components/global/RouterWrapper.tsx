@@ -6,18 +6,29 @@ import { Home } from "../../pages/Home";
 import { Login } from "../../pages/Login";
 import { Navbar } from "./navbar/Navbar";
 import api from "../../api/api";
-import useUserContext from "../../provider/user";
+import useUserContext, { LoggingState } from "../../provider/user";
 import { Footer } from "./footer/Footer";
 import { Register } from "../../pages/Register";
 import { Profile } from "../../pages/Profile";
+import { StockData } from "../../pages/StockData";
 
 export const RouterWrapper = () => {
-  const { user, update } = useUserContext();
+  const { user, update, isLoggedIn } = useUserContext();
+
+  useEffect(() => {
+    const refreshToken = async () => {
+      if (isLoggedIn === LoggingState.Logged) {
+        const res = await api.refresh({ refresh: user!.refresh });
+        update({ ...user, JWT: res.access });
+      }
+    };
+    refreshToken();
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
       if (user) {
-        const res = await api.refresh({ refresh: user?.refresh });
+        const res = await api.refresh({ refresh: user!.refresh });
         update({ ...user, JWT: res.access });
       }
     }, 300000);
@@ -35,6 +46,7 @@ export const RouterWrapper = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/StockData" element={<StockData />} />
             </Routes>
           </Flex>
           <Footer />
