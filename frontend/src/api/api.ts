@@ -72,6 +72,14 @@ class ApiService {
     return req.data;
   }
 
+  public async getCompany(data: any) {
+    const req = await axios.get(
+      `${this.baseUrl}/companies/${data.companyID}`,
+      this.config
+    );
+    return req.data;
+  }
+
   public async getStockData(data: any) {
     this.config.headers!.Authorization = `Bearer ${data.access}`;
     const req = await axios.get(

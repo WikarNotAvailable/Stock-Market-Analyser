@@ -11,6 +11,7 @@ import { Footer } from "./footer/Footer";
 import { Register } from "../../pages/Register";
 import { Profile } from "../../pages/Profile";
 import { StockData } from "../../pages/StockData";
+import { Companies } from "../../pages/Companies";
 
 export const RouterWrapper = () => {
   const { user, update, isLoggedIn } = useUserContext();
@@ -47,6 +48,7 @@ export const RouterWrapper = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/StockData" element={<StockData />} />
+              <Route path="/Companies" element={<Companies />} />
             </Routes>
           </Flex>
           <Footer />
