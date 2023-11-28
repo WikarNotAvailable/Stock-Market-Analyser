@@ -80,6 +80,18 @@ class ApiService {
     return req.data;
   }
 
+  public async getStockMarkets() {
+    const req = await axios.get(`${this.baseUrl}/stock-markets/`, this.config);
+    return req.data;
+  }
+
+  public async getStockMarket(data: any) {
+    const req = await axios.get(
+      `${this.baseUrl}/stock-markets/${data.stockMarketID}`,
+      this.config
+    );
+    return req.data;
+  }
   public async getStockData(data: any) {
     this.config.headers!.Authorization = `Bearer ${data.access}`;
     const req = await axios.get(

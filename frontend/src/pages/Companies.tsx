@@ -2,18 +2,7 @@ import { useEffect, useState } from "react";
 import useUserContext, { LoggingState } from "../provider/user";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
-import {
-  Flex,
-  Select,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Tr,
-  Wrap,
-  WrapItem,
-} from "@chakra-ui/react";
+import { Flex, Select, Table, Tbody, Td, Text, Th, Tr } from "@chakra-ui/react";
 export const Companies = () => {
   const [companies, setCompanies] = useState<any[]>([]);
   const [currentCompanyId, setCurrentCompanyId] = useState<number | null>(null);

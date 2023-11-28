@@ -12,6 +12,7 @@ import { Register } from "../../pages/Register";
 import { Profile } from "../../pages/Profile";
 import { StockData } from "../../pages/StockData";
 import { Companies } from "../../pages/Companies";
+import { StockMarkets } from "../../pages/StockMarkets";
 
 export const RouterWrapper = () => {
   const { user, update, isLoggedIn } = useUserContext();
@@ -49,6 +50,7 @@ export const RouterWrapper = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/StockData" element={<StockData />} />
               <Route path="/Companies" element={<Companies />} />
+              <Route path="/StockMarkets" element={<StockMarkets />} />
             </Routes>
           </Flex>
           <Footer />
