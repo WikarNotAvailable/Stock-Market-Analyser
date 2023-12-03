@@ -92,10 +92,40 @@ class ApiService {
     );
     return req.data;
   }
+
   public async getStockData(data: any) {
     this.config.headers!.Authorization = `Bearer ${data.access}`;
     const req = await axios.get(
       `${this.baseUrl}/data-provider/stock-data/${data.companyID}?page=${data.page}&per_page=50&start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async deleteCompany(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.delete(
+      `${this.baseUrl}/companies/${data.companyID}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async postCompany(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.post(
+      `${this.baseUrl}/companies/`,
+      data,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async updateCompany(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.put(
+      `${this.baseUrl}/companies/${data.companyID}`,
+      data,
       this.config
     );
     return req.data;

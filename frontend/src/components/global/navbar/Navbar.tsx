@@ -23,11 +23,19 @@ export const Navbar = () => {
       </Link>
       <Flex align="center" gap="16px">
         <Flex align="center" gap="24px">
-          <NavLink text="Manage&nbsp;Companies" location="/ManageCompanies" />
-          <NavLink
-            text="Manage&nbsp;Stock&nbsp;Markets"
-            location="/ManageStockMarkets"
-          />
+          {user?.userType === "Admin" && (
+            <>
+              <NavLink
+                text="Manage&nbsp;Companies"
+                location="/ManageCompanies"
+              />
+              <NavLink
+                text="Manage&nbsp;Stock&nbsp;Markets"
+                location="/ManageStockMarkets"
+              />
+            </>
+          )}
+
           <NavLink text="Stock&nbsp;Data" location="/StockData" />
           <NavLink text="Companies" location="/Companies" />
           <NavLink text="Stock&nbsp;Markets" location="/StockMarkets" />

@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, \
-    HTTP_401_UNAUTHORIZED
+from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from src.models.company import Company
 from sqlalchemy import select, delete, update, exc
 from sqlalchemy.orm import Session
@@ -34,7 +33,7 @@ def construct_companies_controller(engine):
         if len(all_data) == 0:
             return jsonify({
                 'error': 'Data for company of such ticker symbol was not found'
-            }), HTTP_404_NOT_FOUND
+            }), HTTP_400_BAD_REQUEST
 
         try:
             datetime.date.fromisoformat(foundation_date)
@@ -56,7 +55,7 @@ def construct_companies_controller(engine):
                         if stock_market is None:
                             return jsonify({
                                 'error': 'Stock market with passed id was not found in database'
-                            }), HTTP_404_NOT_FOUND
+                            }), HTTP_400_BAD_REQUEST
                         stock_market.Companies.append(company)
                         stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))
 
@@ -112,7 +111,7 @@ def construct_companies_controller(engine):
             if company is None:
                 return jsonify({
                     'error': 'Company with passed id was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
             stock_markets_tuples = []
             for stock_market in company.StockMarkets:
@@ -132,7 +131,7 @@ def construct_companies_controller(engine):
             return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
 
         item = get_company(id)
-        if item[1] is HTTP_404_NOT_FOUND:
+        if item[1] is HTTP_400_BAD_REQUEST:
             return item
 
         stmt = delete(Company).where(Company.CompanyID == id)
@@ -159,16 +158,15 @@ def construct_companies_controller(engine):
             if old_company is None:
                 return jsonify({
                     'error': 'Company with passed id was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
-        ticker_symbol = request.get_json().get('TickerSymbol', '')
         name = request.get_json().get('Name', '')
         country = request.get_json().get('Country', '')
         foundation_date = request.get_json().get('FoundationDate', '')
         description = request.get_json().get('Description', '')
         stock_markets_ids = request.get_json().get('StockMarkets', '')
 
-        ticker_symbol = old_company.TickerSymbol if not ticker_symbol else ticker_symbol
+        ticker_symbol = old_company.TickerSymbol
         name = old_company.Name if not name else name
         country = old_company.Country if not country else country
         description = old_company.Description if not description else description
@@ -205,7 +203,7 @@ def construct_companies_controller(engine):
                             session.rollback()
                             return jsonify({
                                 'error': 'Stock market with passed id was not found in database'
-                            }), HTTP_404_NOT_FOUND
+                            }), HTTP_400_BAD_REQUEST
 
                         stock_market.Companies.append(company)
                         stock_markets_tuples.append(({"Name": stock_market.Name, "ID": stock_market.StockMarketID}))

@@ -2,7 +2,7 @@ import { Flex, Text, useDisclosure, useToast } from "@chakra-ui/react";
 import { FC } from "react";
 import { MdAccountCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
-import useUserContext from "../../../provider/user";
+import useUserContext, { LoggingState } from "../../../provider/user";
 
 export const NavProfile: FC = () => {
   const { logOut, isLoggedIn, user } = useUserContext();
@@ -15,7 +15,7 @@ export const NavProfile: FC = () => {
       align="center"
       gap="8px"
       onClick={() => {
-        if (isLoggedIn) {
+        if (isLoggedIn === LoggingState.Logged) {
           isOpen ? onClose() : onOpen();
         } else {
           toast({
@@ -29,7 +29,7 @@ export const NavProfile: FC = () => {
       }}
       cursor="pointer"
     >
-      {isLoggedIn && (
+      {isLoggedIn === LoggingState.Logged && (
         <Text fontSize="16px" fontWeight="600">
           {user?.nickname}
         </Text>
@@ -47,7 +47,7 @@ export const NavProfile: FC = () => {
           border="1px solid #696F8C"
           zIndex="1000"
         >
-          {isLoggedIn && (
+          {isLoggedIn === LoggingState.Logged && (
             <>
               <Link to="/profile">
                 <Flex

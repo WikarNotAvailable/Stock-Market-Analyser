@@ -98,7 +98,7 @@ export const Profile = () => {
       await api.deleteUser({ access: user!.JWT }, user!.userID);
       toast({
         title: "Account has been deleted",
-        status: "error",
+        status: "info",
         duration: 3000,
         isClosable: true,
         position: "top",
