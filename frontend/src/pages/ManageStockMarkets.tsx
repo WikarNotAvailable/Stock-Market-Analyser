@@ -4,13 +4,10 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import {
   Button,
-  Checkbox,
   Flex,
   Select,
   Text,
   Textarea,
-  Wrap,
-  WrapItem,
   useToast,
 } from "@chakra-ui/react";
 import { Input } from "../components/shared/Input";
@@ -20,110 +17,89 @@ enum Action {
   Modify = "Modify",
   Add = "Add",
 }
-
-export const ManageCompanies = () => {
-  const [companies, setCompanies] = useState<any[]>([]);
+export const ManageStockMarkets = () => {
   const [stockMarkets, setStockMarkets] = useState<any[]>([]);
-  const [currentCompanyId, setCurrentCompanyId] = useState<number | null>(null);
+  const [currentStockMarketId, setCurrentStockMarketId] = useState<
+    number | null
+  >(null);
   const [action, setAction] = useState<Action>(Action.Add);
-  const [tickerSymbol, setTickerSymbol] = useState("");
+  const [abbreviation, setAbbreviation] = useState("");
   const [foundationDate, setFoundationDate] = useState("");
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [description, setDescription] = useState("");
-  const [stockMarketsIds, setStockMarketsIds] = useState<number[]>([]);
+  const [localization, setLocalization] = useState("");
+  const [numberOfCompanies, setNumberOfCompanies] = useState("");
   const { isLoggedIn, user } = useUserContext();
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const getCompanies = async () => {
-    const res = await api.getCompanies();
-    const companiesLabels = [];
-    for (const company of res.companies.data) {
-      const companyLabel: {
-        CompanyID: number;
+  const getStockMarkets = async () => {
+    const res = await api.getStockMarkets();
+    const stockMarketsLabels = [];
+    for (const stockMarket of res.stock_markets.data) {
+      const stockMarketLabel: {
+        StockMarketID: number;
         Name: string;
-        TickerSymbol: string;
+        Abbreviation: string;
       } = {
-        CompanyID: company.CompanyID,
-        Name: company.Name,
-        TickerSymbol: company.TickerSymbol,
+        StockMarketID: stockMarket.StockMarketID,
+        Name: stockMarket.Name,
+        Abbreviation: stockMarket.Abbreviation,
       };
-      companiesLabels.push(companyLabel);
+      stockMarketsLabels.push(stockMarketLabel);
     }
-    setCompanies(companiesLabels);
+    setStockMarkets(stockMarketsLabels);
   };
 
   useEffect(() => {
-    const getStockMarkets = async () => {
-      const res = await api.getStockMarkets();
-      const stockMarketsLabels = [];
-      for (const stockMarket of res.stock_markets.data) {
-        const stockMarketLabel: {
-          StockMarketID: number;
-          Name: string;
-          Abbreviation: string;
-        } = {
-          StockMarketID: stockMarket.StockMarketID,
-          Name: stockMarket.Name,
-          Abbreviation: stockMarket.Abbreviation,
-        };
-        stockMarketsLabels.push(stockMarketLabel);
-      }
-      setStockMarkets(stockMarketsLabels);
-    };
-
     if (isLoggedIn === LoggingState.Logged && user?.userType === "Admin") {
-      getCompanies();
       getStockMarkets();
     } else if (
       isLoggedIn === LoggingState.NotLogged ||
       (isLoggedIn === LoggingState.Logged && user?.userType !== "Admin")
     ) {
-      navigate("/login");
+      navigate("/");
     }
   }, [isLoggedIn]);
 
   useEffect(() => {
-    const getCompany = async () => {
-      if (currentCompanyId != null) {
-        const res = await api.getCompany({
-          companyID: currentCompanyId,
+    const getStockMarket = async () => {
+      if (currentStockMarketId != null) {
+        const res = await api.getStockMarket({
+          stockMarketID: currentStockMarketId,
         });
 
         setName(res.Name);
-        setTickerSymbol(res.TickerSymbol);
+        setAbbreviation(res.Abbreviation);
         setCountry(res.Country);
         setFoundationDate(
           new Date(res.FoundationDate).toISOString().split("T")[0]
         );
         setDescription(res.Description);
-        setStockMarketsIds(
-          res.StockMarkets.map((data: any) => {
-            return data.ID;
-          })
-        );
+        setLocalization(res.Localization);
+        setNumberOfCompanies(res.NumberOfCompanies);
       } else {
         setName("");
-        setTickerSymbol("");
+        setAbbreviation("");
         setCountry("");
         setFoundationDate("");
         setDescription("");
-        setStockMarketsIds([]);
+        setLocalization("");
+        setNumberOfCompanies("");
       }
     };
-
-    getCompany();
-  }, [currentCompanyId]);
+    getStockMarket();
+  }, [currentStockMarketId]);
 
   const handleInput = (e: any) => {
-    if (e.target.value.length > 0) setCurrentCompanyId(e.target.value);
-    else setCurrentCompanyId(null);
+    if (e.target.value.length > 0) setCurrentStockMarketId(e.target.value);
+    else setCurrentStockMarketId(null);
   };
 
-  const onChangeTickerSymbol = (e: any) => {
-    setTickerSymbol(e.target.value);
+  const onChangeAbbreviation = (e: any) => {
+    setAbbreviation(e.target.value);
   };
 
   const onChangeName = (e: any) => {
@@ -142,38 +118,61 @@ export const ManageCompanies = () => {
     setDescription(e.target.value);
   };
 
+  const onChangeLocalization = (e: any) => {
+    setLocalization(e.target.value);
+  };
+
+  const onChangeNumberOfCompanies = (e: any) => {
+    setNumberOfCompanies(e.target.value);
+  };
+
   const changeAction = async () => {
     setIsLoading(true);
 
     setAction(action === Action.Add ? Action.Modify : Action.Add);
-    setCurrentCompanyId(null);
-    setTickerSymbol("");
+    setCurrentStockMarketId(null);
+    setAbbreviation("");
     setFoundationDate("");
     setName("");
     setCountry("");
     setDescription("");
-    setStockMarketsIds([]);
+    setLocalization("");
+    setNumberOfCompanies("");
 
     setIsLoading(false);
+  };
+
+  const areFieldsFilled = () => {
+    if (
+      foundationDate === "" ||
+      abbreviation === "" ||
+      name === "" ||
+      country === "" ||
+      description === "" ||
+      localization === "" ||
+      numberOfCompanies === null
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   const handleDelete = async () => {
     setIsLoading(true);
     try {
-      await api.deleteCompany({
+      await api.deleteStockMarket({
         access: user!.JWT,
-        companyID: currentCompanyId,
+        stockMarketID: currentStockMarketId,
       });
-
       toast({
-        title: "Company has been deleted",
+        title: "Stock market has been deleted",
         status: "info",
         duration: 3000,
         isClosable: true,
         position: "top",
       });
-
-      getCompanies();
+      getStockMarkets();
     } catch (error: any) {
       toast({
         title: "Something went wrong. Try again later",
@@ -183,31 +182,16 @@ export const ManageCompanies = () => {
         position: "top",
       });
     }
-    setCurrentCompanyId(null);
-    setTickerSymbol("");
+    setCurrentStockMarketId(null);
+    setAbbreviation("");
     setFoundationDate("");
     setName("");
     setCountry("");
     setDescription("");
-    setStockMarketsIds([]);
+    setLocalization("");
+    setNumberOfCompanies("");
     setAction(Action.Add);
     setIsLoading(false);
-  };
-
-  const areFieldsFilled = () => {
-    if (action === Action.Add && tickerSymbol === "") {
-      return false;
-    } else if (
-      foundationDate === "" ||
-      name === "" ||
-      country === "" ||
-      description === "" ||
-      stockMarketsIds.length === 0
-    ) {
-      return false;
-    } else {
-      return true;
-    }
   };
 
   const handleAction = async () => {
@@ -220,65 +204,75 @@ export const ManageCompanies = () => {
         isClosable: true,
         position: "top",
       });
+    } else if (isNaN(parseInt(numberOfCompanies))) {
+      toast({
+        title: "Number of companies must be a number",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
     } else if (action === Action.Add) {
       try {
-        await api.postCompany({
+        await api.postStockMarket({
           access: user!.JWT,
-          TickerSymbol: tickerSymbol,
+          Abbreviation: abbreviation,
           Name: name,
           Country: country,
           FoundationDate: foundationDate,
           Description: description,
-          StockMarkets: stockMarketsIds,
+          Localization: localization,
+          NumberOfCompanies: parseInt(numberOfCompanies),
         });
 
         toast({
-          title: "Company has been added",
+          title: "Stock market has been added",
           status: "info",
           duration: 3000,
           isClosable: true,
           position: "top",
         });
 
-        getCompanies();
-        setTickerSymbol("");
+        getStockMarkets();
+        setAbbreviation("");
         setFoundationDate("");
         setName("");
         setCountry("");
         setDescription("");
-        setStockMarketsIds([]);
+        setLocalization("");
+        setNumberOfCompanies("");
       } catch (error: any) {
-        if (error.response.request.status == 400) {
-          toast({
-            title: "Incorrect ticker symbol",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-          });
-        }
+        toast({
+          title: "Something went wrong",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
       }
     } else {
       try {
-        await api.updateCompany({
+        await api.updateStockMarket({
           access: user!.JWT,
-          companyID: currentCompanyId,
+          stockMarketID: currentStockMarketId,
+          Abbreviation: abbreviation,
           Name: name,
           Country: country,
           FoundationDate: foundationDate,
           Description: description,
-          StockMarkets: stockMarketsIds,
+          Localization: localization,
+          NumberOfCompanies: parseInt(numberOfCompanies),
         });
 
         toast({
-          title: "Company has been updated",
+          title: "Stock Market has been updated",
           status: "info",
           duration: 3000,
           isClosable: true,
           position: "top",
         });
 
-        getCompanies();
+        getStockMarkets();
       } catch (error: any) {
         toast({
           title: "Something went wrong",
@@ -292,31 +286,20 @@ export const ManageCompanies = () => {
     setIsLoading(false);
   };
 
-  const onCheckboxChange = (id: number) => {
-    var index = stockMarketsIds.indexOf(id);
-    if (index !== -1) {
-      setStockMarketsIds((oldStockMarketIds) => [
-        ...oldStockMarketIds.filter((oldID) => oldID !== id),
-      ]);
-    } else {
-      setStockMarketsIds((oldStockMarketIds) => [...oldStockMarketIds, id]);
-    }
-  };
-
   return (
     <Flex flexDir="column" gap="16px" align="center" w="20vw">
       <Flex flexDir="column" gap="8px" w="20vw">
         <Text fontSize="24px" fontWeight="600" color="#2dc2e9" align="center">
-          {action === Action.Add ? "Add Company" : "Modify Company"}
+          {action === Action.Add ? "Add Stock Market" : "Modify Stock Market"}
         </Text>
         {action === Action.Modify && (
           <>
             <Text fontSize="16px" align="left">
-              Company
+              Stock Market
             </Text>
             <Select
-              placeholder="Select company"
-              name="CompanyID"
+              placeholder="Select stock market"
+              name="StockMarketID"
               color="textPrimary"
               border="1px solid #696F8C"
               focusBorderColor="#696F8C"
@@ -325,28 +308,25 @@ export const ManageCompanies = () => {
               onChange={handleInput}
               w="20vw"
             >
-              {companies.map((company: any) => (
+              {stockMarkets.map((stockMarket: any) => (
                 <option
-                  key={company.CompanyID}
-                  value={company.CompanyID}
-                >{`${company.Name}, ${company.TickerSymbol}`}</option>
+                  key={stockMarket.StockMarketID}
+                  value={stockMarket.StockMarketID}
+                >{`${stockMarket.Name}, ${stockMarket.Abbreviation}`}</option>
               ))}
             </Select>
           </>
         )}
 
-        {action === Action.Add && (
-          <Input
-            width="20vw"
-            heading="Ticker Symbol"
-            value={tickerSymbol}
-            onChange={onChangeTickerSymbol}
-          />
-        )}
-
         {(action === Action.Add ||
-          (action === Action.Modify && currentCompanyId !== null)) && (
+          (action === Action.Modify && currentStockMarketId !== null)) && (
           <>
+            <Input
+              width="20vw"
+              heading="Abbreviation"
+              value={abbreviation}
+              onChange={onChangeAbbreviation}
+            />
             <Input
               width="20vw"
               heading="Name"
@@ -366,6 +346,18 @@ export const ManageCompanies = () => {
               value={foundationDate}
               onChange={onChangeFoundationDate}
             />
+            <Input
+              width="20vw"
+              heading="Localization"
+              value={localization}
+              onChange={onChangeLocalization}
+            />
+            <Input
+              width="20vw"
+              heading="Number of Companies"
+              value={numberOfCompanies}
+              onChange={onChangeNumberOfCompanies}
+            />
             <Text fontSize="16px" align="left">
               Description
             </Text>
@@ -379,22 +371,6 @@ export const ManageCompanies = () => {
               _hover={{ border: "1px solid rgba(0, 0, 0, 0.9)" }}
               borderRadius="20px"
             />
-            <Text fontSize="16px" align="left">
-              Stock Markets
-            </Text>
-
-            <Wrap spacing="16px">
-              {stockMarkets.map((stockMarket: any) => (
-                <WrapItem>
-                  <Checkbox
-                    isChecked={stockMarketsIds.includes(
-                      stockMarket.StockMarketID
-                    )}
-                    onChange={() => onCheckboxChange(stockMarket.StockMarketID)}
-                  >{`${stockMarket.Name}, ${stockMarket.Abbreviation}`}</Checkbox>
-                </WrapItem>
-              ))}
-            </Wrap>
 
             <Flex flexDir="row" gap="8px" align="center" w="20vw">
               <Button
@@ -412,7 +388,7 @@ export const ManageCompanies = () => {
 
               {action === Action.Modify && (
                 <ConfirmDeleteButton
-                  itemName="Company"
+                  itemName="Stock Market"
                   isLoading={isLoading}
                   onConfirm={handleDelete}
                 />

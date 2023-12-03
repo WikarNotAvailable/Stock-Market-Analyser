@@ -45,6 +45,7 @@ export const StockMarkets = () => {
         const res = await api.getStockMarket({
           stockMarketID: currentStockMarketId,
         });
+
         const stockMarket: {
           Name: string;
           Abbreviation: string;
@@ -78,6 +79,9 @@ export const StockMarkets = () => {
   return (
     <Flex flexDir="column" gap="16px" align="center" w="20vw">
       <Flex flexDir="column" gap="8px">
+        <Text fontSize="24px" fontWeight="600" color="#2dc2e9" align="center">
+          View Stock Market Data
+        </Text>
         <Text fontSize="16px" align="left">
           Stock&nbsp;Market
         </Text>

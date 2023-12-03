@@ -75,6 +75,9 @@ export const Companies = () => {
   return (
     <Flex flexDir="column" gap="16px" align="center" w="20vw">
       <Flex flexDir="column" gap="8px">
+        <Text fontSize="24px" fontWeight="600" color="#2dc2e9" align="center">
+          View Company Data
+        </Text>
         <Text fontSize="16px" align="left">
           Company
         </Text>

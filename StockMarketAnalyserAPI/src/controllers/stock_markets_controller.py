@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND, \
-    HTTP_401_UNAUTHORIZED
+from src.constants.__http_status_codes import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from src.models.stock_market import StockMarket
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
@@ -79,7 +78,7 @@ def construct_stock_markets_controller(engine):
             if stock_market is None:
                 return jsonify({
                     'error': 'Stock market with passed id was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
         return jsonify({
             'StockMarketID': stock_market.StockMarketID, 'Name': stock_market.Name,
@@ -96,7 +95,7 @@ def construct_stock_markets_controller(engine):
             return jsonify({'error': "Unauthorized action"}), HTTP_401_UNAUTHORIZED
 
         item = get_stock_market(id)
-        if item[1] is HTTP_404_NOT_FOUND:
+        if item[1] is HTTP_400_BAD_REQUEST:
             return item
 
         stmt = delete(StockMarket).where(StockMarket.StockMarketID == id)
@@ -123,7 +122,7 @@ def construct_stock_markets_controller(engine):
             if stock_market is None:
                 return jsonify({
                     'error': 'Stock market with passed id was not found in database'
-                }), HTTP_404_NOT_FOUND
+                }), HTTP_400_BAD_REQUEST
 
         name = request.get_json().get('Name', '')
         abbreviation = request.get_json().get('Abbreviation', '')

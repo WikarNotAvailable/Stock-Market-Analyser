@@ -130,6 +130,35 @@ class ApiService {
     );
     return req.data;
   }
+
+  public async deleteStockMarket(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.delete(
+      `${this.baseUrl}/stock-markets/${data.stockMarketID}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async postStockMarket(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.post(
+      `${this.baseUrl}/stock-markets/`,
+      data,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async updateStockMarket(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.put(
+      `${this.baseUrl}/stock-markets/${data.stockMarketID}`,
+      data,
+      this.config
+    );
+    return req.data;
+  }
 }
 
 const api = new ApiService();

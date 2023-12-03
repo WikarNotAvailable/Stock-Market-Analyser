@@ -237,7 +237,7 @@ export const Profile = () => {
   };
   return (
     <Flex flexDir="column" gap="16px" align="center" w="20vw">
-      <Text fontSize="24px" fontWeight="600" align="left">
+      <Text fontSize="24px" fontWeight="600" align="left" color="#2dc2e9">
         Hello&nbsp;{isLoggedIn === LoggingState.Logged ? user!.nickname : ""}
       </Text>
       <Avatar src="https://bit.ly/broken-link" size="xl" />

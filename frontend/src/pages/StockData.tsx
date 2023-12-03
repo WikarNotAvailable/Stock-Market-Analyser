@@ -179,6 +179,9 @@ export const StockData = () => {
   return (
     <Flex flexDir="column" gap="16px" align="center" w="100vw">
       <Flex flexDir="column" gap="8px" w="20vw">
+        <Text fontSize="24px" fontWeight="600" color="#2dc2e9" align="center">
+          View Stock Data
+        </Text>
         <Text fontSize="16px" align="left">
           Company
         </Text>
