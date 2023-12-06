@@ -102,6 +102,15 @@ class ApiService {
     return req.data;
   }
 
+  public async getAllStockData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/stock-data/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
   public async deleteCompany(data: any) {
     this.config.headers!.Authorization = `Bearer ${data.access}`;
     const req = await axios.delete(
@@ -155,6 +164,78 @@ class ApiService {
     const req = await axios.put(
       `${this.baseUrl}/stock-markets/${data.stockMarketID}`,
       data,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getEMAData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/EMA/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getStochData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/stochastic-oscillator/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getOnBalanceData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/on-balance-volume/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getMACDData(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/MACD/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getRSI(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/RSI/${data.companyID}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getSMA(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/SMA/${data.companyID}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getStats(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/data-provider/stats/${data.companyID}?start=${data.startingDate}`,
+      this.config
+    );
+    return req.data;
+  }
+
+  public async getPrediction(data: any) {
+    this.config.headers!.Authorization = `Bearer ${data.access}`;
+    const req = await axios.get(
+      `${this.baseUrl}/predict/${data.Tick}`,
       this.config
     );
     return req.data;

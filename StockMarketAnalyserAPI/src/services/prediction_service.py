@@ -128,7 +128,7 @@ def construct_prediction_service(engine):
         output = loaded_y_sc.inverse_transform(output)
 
         return jsonify({
-            '21stdevPRED': round(output[0][0].item(), 2)
+            'stdev21PRED': round(output[0][0].item(), 2)
         }), HTTP_200_OK
 
     return prediction_service

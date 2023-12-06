@@ -47,7 +47,7 @@ def construct_stock_data_provider_service(engine):
             is_paged = False
             stmt = select(HistoricalStockData) \
                 .where(and_(start <= HistoricalStockData.Date, HistoricalStockData.CompanyID == company_id))\
-                .order_by(HistoricalStockData.Date.desc())
+                .order_by(HistoricalStockData.Date.asc())
 
         with Session(engine) as session:
             all_stock_data = session.execute(stmt).scalars().all()
@@ -302,7 +302,7 @@ def construct_stock_data_provider_service(engine):
 
         return jsonify({
             'kfast': k_fast_arr[kfast_start_index:len(k_fast_arr)],
-            'dfast/kslow': d_fast_arr[dfast_start_index:len(d_fast_arr)],
+            'dfastkslow': d_fast_arr[dfast_start_index:len(d_fast_arr)],
             'dslow': d_slow_arr[dslow_start_index:len(d_slow_arr)]
         }), HTTP_200_OK
 
