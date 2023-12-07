@@ -18,10 +18,12 @@ The main objective of this project is to provide solution to analyse recent stoc
 - predicting standard deviation of simple return for the next day
   
 **Data Source**
+
 On every time the backend is turned on, new data (most recent) from yahoo finance is being fetched. 
 https://finance.yahoo.com/
 
 **Machine Learning**
+
 Standard deviation of simple return is predicted with LSTM model.
 
 **Database diagram**
