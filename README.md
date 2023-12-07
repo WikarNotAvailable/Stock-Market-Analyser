@@ -55,6 +55,7 @@ Standard deviation of simple return is predicted with LSTM model.
   **Stock Markets**
   ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/578dbf19-0961-44d5-b4eb-3dfc8fdcc25d)
 
+
   **Profile**
   ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/e2e916d8-08c1-4077-8224-6a0be5601b98)
   ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/191741bf-e279-4c73-8af1-d73ed46954a4)
