@@ -243,7 +243,7 @@ export const ManageStockMarkets = () => {
         setNumberOfCompanies("");
       } catch (error: any) {
         toast({
-          title: "Something went wrong",
+          title: "One of the fields might be too long",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -275,7 +275,7 @@ export const ManageStockMarkets = () => {
         getStockMarkets();
       } catch (error: any) {
         toast({
-          title: "Something went wrong",
+          title: "One of the fields might be too long",
           status: "error",
           duration: 3000,
           isClosable: true,

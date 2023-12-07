@@ -248,9 +248,17 @@ export const ManageCompanies = () => {
         setDescription("");
         setStockMarketsIds([]);
       } catch (error: any) {
-        if (error.response.request.status == 400) {
+        if (error.response?.request.status == 400) {
           toast({
             title: "Incorrect ticker symbol",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+            position: "top",
+          });
+        } else {
+          toast({
+            title: "One of the fields might be too long",
             status: "error",
             duration: 3000,
             isClosable: true,
@@ -281,7 +289,7 @@ export const ManageCompanies = () => {
         getCompanies();
       } catch (error: any) {
         toast({
-          title: "Something went wrong",
+          title: "One of the fields might be too long",
           status: "error",
           duration: 3000,
           isClosable: true,
