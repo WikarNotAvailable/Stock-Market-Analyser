@@ -39,18 +39,18 @@ Standard deviation of simple return is predicted with LSTM model.
   ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/dec27f0e-ef91-49cf-a6d1-5b922d8fb9dc)
 
   **Manage Companies**
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/755c51c0-a0d2-4cba-996f-8cff41152707)
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/695dc8ed-e189-4132-a4d3-62169a067af0)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/8a4b3d6d-8502-4056-9497-532435a81e89)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/77e547ce-f13a-47b3-a45e-ea1574858e5e)
 
   **Manage Stock Markets**
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/c9ff4117-ccda-4156-a28c-038cbd3fe17a)
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/a1163e1a-dc77-4b85-a00b-04659c2ce980)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/fbc4b480-17f8-4ace-b4f7-2d25285b20f1)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/4d3fa34c-b806-403c-93cf-cf12cd11c985)
 
   **Stock Data**
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/f203abbb-a055-4245-8501-fdfdb4ec56b4)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/bacca273-607d-41a6-95cc-3109845fbae8)
 
   **Companies**
-  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/5184987e-159b-49cd-aaae-575a6bf23367)
+  ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/006c02a2-d910-40a2-ab34-f7d845f0b814)
 
   **Stock Markets**
   ![image](https://github.com/WikarNotAvailable/Stock-Market-Analyser/assets/72315779/578dbf19-0961-44d5-b4eb-3dfc8fdcc25d)
