@@ -79,7 +79,7 @@ def create_model(tick):
     model.add(Dense(1, activation='linear'))
     adam = optimizers.Adam()
     model.compile(optimizer=adam, loss='mse', metrics=['mean_absolute_error'])
-    model.fit(x=X_train, y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
+    model.fit(x=X_train, y=y_train, batch_size=16, epochs=50, shuffle=True, validation_split=0.1)
     save_model(model, f'src/company_models/{tick}.h5')
 
     y_pred = sc_targets.inverse_transform(model.predict(X_test))
